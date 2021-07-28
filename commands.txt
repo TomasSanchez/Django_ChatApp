@@ -1,0 +1,58 @@
+DJANGO
+
+$ python3 -m venv venv
+$ source venv/bin/activate
+$ pip install django
+$ django-admin startproject admin .
+$ django-admin startapp users apps/users
+$ pip install djangorestframework
+$ pip install django-cors-headers
+$ pip install django-environ
+
+
+
+
+
+
+
+
+
+
+REACT
+
+Create react app with typescript inside folder
+$ npx create-react-app . --template typescript
+
+% npm install -D tailwindcss@npm:@tailwindcss/postcss7-compat postcss@^7 autoprefixer@^9
+
+$ npm install @craco/craco
+
+Replace react-scripts start/build/test with: craco start/build/test in package.json
+
+
+Next, create a craco.config.js at the root of our project and add the tailwindcss and autoprefixer as PostCSS plugins:
+// craco.config.js
+module.exports = {
+  style: {
+    postcss: {
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer'),
+      ],
+    },
+  },
+}
+
+$ npx tailwindcss-cli@latest init
+
+add: to tailwind.config 
+purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
+
+include tailwind in css 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+$ npm install react-router-dom
+$ npm i --save-dev @types/react-router-dom
+$ npm install axios

@@ -8,7 +8,8 @@ $ django-admin startapp users apps/users
 $ pip install djangorestframework
 $ pip install django-cors-headers
 $ pip install django-environ
-
+$ python -m pip install -U channels
+$ pip install channels_redis
 
 
 
@@ -56,3 +57,5 @@ include tailwind in css
 $ npm install react-router-dom
 $ npm i --save-dev @types/react-router-dom
 $ npm install axios
+$ npm i websocket
+$ npm i --save-dev @types/websocket

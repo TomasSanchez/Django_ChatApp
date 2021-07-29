@@ -29,6 +29,17 @@ ROOT_URLCONF = 'admin.urls'
 
 WSGI_APPLICATION = "admin.wsgi.application"
 
+ASGI_APPLICATION = 'admin.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
+
+
 DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,10 +52,12 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "corsheaders",
+    'channels',
 ]
 
 LOCAL_APPS = [
     'apps.users',
+    'apps.chat',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -108,7 +121,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    # "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 
 STATIC_URL = '/static/'

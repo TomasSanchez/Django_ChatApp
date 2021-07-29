@@ -17,7 +17,8 @@
 		"react-router-dom": "^5.2.0",
 		"react-scripts": "4.0.3",
 		"typescript": "^4.1.2",
-		"web-vitals": "^1.0.1"
+		"web-vitals": "^1.0.1",
+		"websocket": "^1.0.34"
 	},
 	"scripts": {
 		"start": "craco start",
@@ -45,6 +46,7 @@
 	},
 	"devDependencies": {
 		"@types/react-router-dom": "^5.1.8",
+		"@types/websocket": "^1.0.4",
 		"autoprefixer": "^9.8.6",
 		"postcss": "^7.0.36",
 		"tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.7"

@@ -2,7 +2,8 @@ from .base import * #noqa
 from .base import env
 
 DEBUG = True
-SECRET_KEY = 'django-insecure-)udk^l*hobneqn5-fm@k7@cukxhq7a%#_(0fsmpzjb%%)=@=$z'
+
+SECRET_KEY = env.str('SECRET_KEY', default='django-insecure-)udk^l*hobneqn5-fm@k7@cukxhq7a%#_(0fsmpzjb%%)=@=$z')
 
 ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
 
@@ -18,7 +19,6 @@ MIDDLEWARE = [
 ]
 
 
-# CORS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",

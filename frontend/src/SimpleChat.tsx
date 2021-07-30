@@ -5,7 +5,7 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 const client = new W3CWebSocket("ws://127.0.0.1:8000/ws/chat/room4/");
 
-const Chat = () => {
+const SimpleChat = () => {
 	const [input, setInput] = useState("");
 
 	client.onopen = () => {
@@ -22,37 +22,6 @@ const Chat = () => {
 		console.log("close:", message);
 	};
 
-	// const client = WebSocketClient();
-
-	// client.on("connectFailed", function (error: any) {
-	// 	console.log("Connect Error: " + error.toString());
-	// });
-
-	// client.on("connect", function (connection: any) {
-	// 	console.log("WebSocket Client Connected");
-	// 	connection.on("error", function (error: any) {
-	// 		console.log("Connection Error: " + error.toString());
-	// 	});
-	// 	connection.on("close", function () {
-	// 		console.log("echo-protocol Connection Closed");
-	// 	});
-	// 	connection.on("message", function (message: any) {
-	// 		if (message.type === "utf8") {
-	// 			console.log("Received: '" + message.utf8Data + "'");
-	// 		}
-	// 	});
-
-	// 	function sendNumber() {
-	// 		if (connection.connected) {
-	// 			var number = Math.round(Math.random() * 0xffffff);
-	// 			connection.sendUTF(number.toString());
-	// 			setTimeout(sendNumber, 1000);
-	// 		}
-	// 	}
-	// 	sendNumber();
-	// });
-
-	// client.connect("ws://localhost:8000/");
 	const handleSubmit = (text: string) => {
 		client.send(JSON.stringify({ message: text }));
 		setInput("");
@@ -130,4 +99,4 @@ const Chat = () => {
 	);
 };
 
-export default Chat;
+export default SimpleChat;

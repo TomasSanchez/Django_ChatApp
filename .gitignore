@@ -1,2 +1,4 @@
 .DS-Store
 venv
+*.rdb
+.DS_Store

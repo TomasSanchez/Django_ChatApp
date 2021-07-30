@@ -10,6 +10,16 @@ SECRET_KEY = env.str("SECRET_KEY")
 # TODO Set list on env file
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["0.0.0.0"])
 
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [env.str('REDIS_URL', 'redis://localhost:6379')],
+        },
+    },
+}
+
 # TODO
 """
 Configure databases

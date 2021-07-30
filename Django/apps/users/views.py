@@ -101,16 +101,5 @@ class WhoAmI(APIView):
         if request.user.is_authenticated:
             user = request.user
             return Response({ 'id':user.id, 'email':user.email, 'user_name':user.user_name,
-                            'first_name':user.first_name, 'last_name':user.last_name, 'following': user.following.all().values()})
+                            'first_name':user.first_name, 'last_name':user.last_name})
         return Response({'AnonymousUser'})
-
-
-class DynamicSearchFilter(filters.SearchFilter):
-    def get_search_fields(self, view, request):
-        return request.GET.getlist('search_fields', [])
-
-
-class SearchView(generics.ListAPIView):
-    filter_backends = (DynamicSearchFilter,)
-    queryset = User.objects.all()
-    serializer_class = UserSerializer

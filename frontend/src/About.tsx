@@ -1,8 +1,8 @@
 const About = () => {
 	return (
 		<div>
-			<div className='text-gray-300 bg-gray-900 px-5 pt-5  flex flex-wrap items-center justify-center'>
-				<section className='text-gray-300 body-font'>
+			<div className='text-black px-5 pt-5 sm:mt-24 mb-5 flex flex-wrap items-center justify-center'>
+				<section className='body-font rounded-lg shadow-xl border border-gray-300 bg-gray-100 '>
 					<div className=' px-2 py-5 mx-auto'>
 						<div className='lg:w-3/4 mx-auto text-center'>
 							<svg
@@ -14,13 +14,16 @@ const About = () => {
 							</svg>
 							<p className='leading-relaxed text-lg'>
 								<strong> Django + React Chat app. </strong>
-								<br /> This a basic Chat App model developed as a learning exercise. <br />
+								<br /> This a basic Chat App model developed as a learning exercise. <br /> Build with
+								Django and react integrating channels and redis using websockets to build a realtime
+								chat app.
 							</p>
 							<span className='inline-block h-1 w-10 rounded bg-green-500 mt-8 mb-6' />
 
-							<p className='text-gray-200'>All technologies used:</p>
+							<p className='text-gray-800'>All technologies used:</p>
 							<br />
-							<div className='flex title-font font-medium items-center md:justify-center justify-center text-white'>
+							{/* Icons/Logos */}
+							{/* <div className='flex title-font font-medium items-center md:justify-center justify-center text-white'>
 								<div className='Django'>
 									<svg
 										width={45.63}
@@ -270,6 +273,7 @@ const About = () => {
 									</svg>
 								</div>
 							</div>
+							*/}
 							<div className='my-2 p-2 '>
 								<div>
 									<p>

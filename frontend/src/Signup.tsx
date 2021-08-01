@@ -75,8 +75,8 @@ const Signup = () => {
 			</div>
 		</div>
 	) : (
-		<div>
-			<div className='p-8 bg-gray-100 shadow-lg border border-gray-200 flex flex-col md:ml-auto w-full md:px-56 md:rounded-lg md:mt-10 height: 81.99vh; container m-auto'>
+		<div className='flex justify-center lg:mx-40 xl:mx-60 mx-10 my-5'>
+			<div className='8 bg-gray-100 shadow-lg border border-gray-200 flex flex-col mx-auto px-5 md:px-20 md:mx-28 md:mt-10  py-8 rounded-lg height: 81.99vh; container m-auto'>
 				<form action='' onSubmit={handleSubmit}>
 					<div className='flex flex-row '>
 						<h2 className='text-black text-lg font-medium title-font mb-5'>Sign Up</h2>
@@ -97,7 +97,7 @@ const Signup = () => {
 							name='first-name'
 							value={user.first_name}
 							onChange={(e) => setUser({ ...user, first_name: e.target.value })}
-							className='w-full bg-gray-600 bg-opacity-20 focus:bg-transparent focus:ring-2 focus:ring-indigo-900 rounded border border-gray-600 focus:border-indigo-500 text-base outline-none text-gray-100 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out'
+							className='w-full bg-gray-600 bg-opacity-20 focus:bg-transparent focus:ring-2 focus:ring-indigo-900 rounded border border-gray-600 focus:border-indigo-500 text-base outline-none text-gray-800 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out'
 							maxLength={90}
 						/>
 					</div>
@@ -116,7 +116,7 @@ const Signup = () => {
 							name='last-name'
 							value={user.last_name}
 							onChange={(e) => setUser({ ...user, last_name: e.target.value })}
-							className='w-full bg-gray-600 bg-opacity-20 focus:bg-transparent focus:ring-2 focus:ring-indigo-900 rounded border border-gray-600 focus:border-indigo-500 text-base outline-none text-gray-100 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out'
+							className='w-full bg-gray-600 bg-opacity-20 focus:bg-transparent focus:ring-2 focus:ring-indigo-900 rounded border border-gray-600 focus:border-indigo-500 text-base outline-none text-gray-800 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out'
 							maxLength={90}
 						/>
 					</div>
@@ -133,7 +133,7 @@ const Signup = () => {
 							name='email'
 							value={user.email}
 							onChange={(e) => setUser({ ...user, email: e.target.value })}
-							className='w-full bg-gray-600 bg-opacity-20 focus:bg-transparent focus:ring-2 focus:ring-indigo-900 rounded border border-gray-600 focus:border-indigo-500 text-base outline-none text-gray-100 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out'
+							className='w-full bg-gray-600 bg-opacity-20 focus:bg-transparent focus:ring-2 focus:ring-indigo-900 rounded border border-gray-600 focus:border-indigo-500 text-base outline-none text-gray-800 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out'
 						/>
 					</div>
 					<div className='relative mb-4'>
@@ -153,7 +153,7 @@ const Signup = () => {
 							name='user-name'
 							value={user.user_name}
 							onChange={(e) => setUser({ ...user, user_name: e.target.value })}
-							className='w-full bg-gray-600 bg-opacity-20 focus:bg-transparent focus:ring-2 focus:ring-indigo-900 rounded border border-gray-600 focus:border-indigo-500 text-base outline-none text-gray-100 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out'
+							className='w-full bg-gray-600 bg-opacity-20 focus:bg-transparent focus:ring-2 focus:ring-indigo-900 rounded border border-gray-600 focus:border-indigo-500 text-base outline-none text-gray-800 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out'
 							maxLength={90}
 						/>
 					</div>
@@ -167,7 +167,7 @@ const Signup = () => {
 							name='password'
 							value={user.password}
 							onChange={(e) => setUser({ ...user, password: e.target.value })}
-							className='w-full bg-gray-600 bg-opacity-20 focus:bg-transparent focus:ring-2 focus:ring-indigo-900 rounded border border-gray-600 focus:border-indigo-500 text-base outline-none text-gray-100 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out'
+							className='w-full bg-gray-600 bg-opacity-20 focus:bg-transparent focus:ring-2 focus:ring-indigo-900 rounded border border-gray-600 focus:border-indigo-500 text-base outline-none text-gray-800 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out'
 						/>
 					</div>
 					<div className='text-red-500'>

@@ -1,92 +1,50 @@
-import { useState } from "react";
-// import WebSocketClient from 'websocket'
-// var WebSocketClient = require("websocket").client;
+import { useEffect, useState, useContext } from "react";
 import { w3cwebsocket as W3CWebSocket } from "websocket";
-
-const client = new W3CWebSocket("ws://127.0.0.1:8000/ws/chat/room4/");
+import { useParams } from "react-router-dom";
+import { ContextAuth } from "./context/AuthContext";
 
 const Chat = () => {
-	const [input, setInput] = useState("");
+	const { isLogedIn, current_logged_user } = useContext(ContextAuth);
+	const [input, setInput] = useState<string>("");
+	const [client, setClient] = useState<W3CWebSocket>();
+	const { id } = useParams<{ id: string }>();
+	const [messages, setMessages] = useState([
+		{ text: "1mas vale", author: "" },
+		{ text: "2Hola como estas", author: "" },
+		{ text: "3asd42134", author: "" },
+	]);
 
-	client.onopen = () => {
-		console.log("OPEN, WebSocket Client Connected");
-	};
+	useEffect(() => {
+		const client = new W3CWebSocket(`ws://127.0.0.1:8000/ws/chat/private/${id}/`);
+		setClient(client);
+	}, []);
 
-	client.onmessage = (message) => {
-		console.log("message:", message);
-	};
-	client.onerror = (error) => {
-		console.error("error:", error);
-	};
-	client.onclose = (message) => {
-		console.log("close:", message);
-	};
+	if (!isLogedIn) {
+		// gotohome
+	}
 
-	// const client = WebSocketClient();
-
-	// client.on("connectFailed", function (error: any) {
-	// 	console.log("Connect Error: " + error.toString());
-	// });
-
-	// client.on("connect", function (connection: any) {
-	// 	console.log("WebSocket Client Connected");
-	// 	connection.on("error", function (error: any) {
-	// 		console.log("Connection Error: " + error.toString());
-	// 	});
-	// 	connection.on("close", function () {
-	// 		console.log("echo-protocol Connection Closed");
-	// 	});
-	// 	connection.on("message", function (message: any) {
-	// 		if (message.type === "utf8") {
-	// 			console.log("Received: '" + message.utf8Data + "'");
-	// 		}
-	// 	});
-
-	// 	function sendNumber() {
-	// 		if (connection.connected) {
-	// 			var number = Math.round(Math.random() * 0xffffff);
-	// 			connection.sendUTF(number.toString());
-	// 			setTimeout(sendNumber, 1000);
-	// 		}
-	// 	}
-	// 	sendNumber();
-	// });
-
-	// client.connect("ws://localhost:8000/");
+	if (client) {
+		client.onopen = () => {
+			console.log("OPEN, WebSocket Client Connected");
+		};
+		client.onmessage = (message) => {
+			console.log("message:", message);
+		};
+		client.onerror = (error) => {
+			console.error("error:", error);
+		};
+		client.onclose = (message) => {
+			console.log("close:", message);
+		};
+	}
 	const handleSubmit = (text: string) => {
-		client.send(JSON.stringify({ message: text }));
+		client!.send(JSON.stringify({ message: text, user: current_logged_user }));
 		setInput("");
 	};
 
 	const handleClose = () => {
-		client.close();
+		client!.close();
 	};
-
-	const messages: any = [
-		{ text: "1mas vale", author: "" },
-		{ text: "2Hola como estas", author: "" },
-		{ text: "3asd42134", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-		{ text: "4asd1", author: "" },
-	];
 
 	return (
 		<div>

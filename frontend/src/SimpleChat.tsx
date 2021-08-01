@@ -1,34 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import WebSocketClient from 'websocket'
 // var WebSocketClient = require("websocket").client;
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-const client = new W3CWebSocket("ws://127.0.0.1:8000/ws/chat/room4/");
-
 const SimpleChat = () => {
 	const [input, setInput] = useState("");
 
-	client.onopen = () => {
-		console.log("OPEN, WebSocket Client Connected");
-	};
-
-	client.onmessage = (message) => {
-		console.log("message:", message);
-	};
-	client.onerror = (error) => {
-		console.error("error:", error);
-	};
-	client.onclose = (message) => {
-		console.log("close:", message);
-	};
+	// client.onopen = () => {
+	// 	console.log("OPEN, WebSocket Client Connectedasdasdasd");
+	// };
+	// client.onmessage = (message) => {
+	// 	console.log("message:", message);
+	// };
+	// client.onerror = (error) => {
+	// 	console.error("error:", error);
+	// };
+	// client.onclose = (message) => {
+	// 	console.log("close:", message);
+	// };
 
 	const handleSubmit = (text: string) => {
-		client.send(JSON.stringify({ message: text }));
+		// client.send(JSON.stringify({ message: text }));
 		setInput("");
 	};
 
 	const handleClose = () => {
-		client.close();
+		// client.close();
 	};
 
 	const messages: any = [
@@ -56,6 +53,13 @@ const SimpleChat = () => {
 		{ text: "4asd1", author: "" },
 		{ text: "4asd1", author: "" },
 	];
+
+	// useEffect(() => {
+	// 	let client = new W3CWebSocket("ws://127.0.0.1:8000/ws/chat/roomadasdas4/");
+	// 	client.onopen = () => {
+	// 		console.log("OPEN, WebSocket Client Connected");
+	// 	};
+	// }, []);
 
 	return (
 		<div>

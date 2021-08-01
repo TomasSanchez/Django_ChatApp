@@ -16,7 +16,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 
 class CreateUser(APIView):
-    
+    permission_classes = [AllowAny]
     def post(self, request):
         reg_serializer = UserSerializer(data=request.data)
         if reg_serializer.is_valid():

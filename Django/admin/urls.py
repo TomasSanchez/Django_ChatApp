@@ -19,4 +19,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/users/', include("apps.users.urls", namespace="users")),
+    path('api/chat/', include("apps.chat.urls", namespace="chat")),
 ]

@@ -1,12 +1,104 @@
 from django.contrib.auth import get_user_model
+from django.db.models import query
 from django.shortcuts import render, get_object_or_404
-from .models import Chat
+from django.http.response import JsonResponse
+from django.db.models.query import QuerySet
+
+from rest_framework import generics, filters
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated, SAFE_METHODS
+
+from .models import Message, PrivateChat
+from .serializers import MessageSerializer, PrivateChatSerializer
 
 User = get_user_model()
 
-# View for all chats of current user
 # View for all messages of current user on a specific chat
-# 
+
+def get_authenticated_user_chats(queryset, user):
+    query = []
+    for chat in queryset:
+        if user in chat.users.all():
+            print(f"True {user} is in {chat}")
+            query.append(chat)
+    return query
+
+
+class PostUserWritePermission(BasePermission):
+    message = 'Editing posts is restricted to post owner'
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+
+        return obj.author == request.user 
+
+
+class AllMessages(generics.ListAPIView):
+    """ returns all messages from current user """
+    
+    permission_classes = [IsAuthenticated]
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        assert self.queryset is not None, (
+            "'%s' should either include a `queryset` attribute, "
+            "or override the `get_queryset()` method."
+            % self.__class__.__name__
+        )
+        queryset = self.queryset
+        chats = PrivateChat.objects.all()
+
+        if isinstance(queryset, QuerySet):
+            query = []
+            chat_query = get_authenticated_user_chats(queryset=chats, user=user)
+            queryset = queryset.all()
+            print(f"------------------------------------------ \n << chat_query: \n{chat_query} \n >> \n------------------------------------------")
+            print(f"------------------------------------------ \n << queryset: \n{queryset} \n >> \n------------------------------------------")
+            for chat in chat_query:
+                chat.private_chat_message.all()
+
+        return queryset
+
+
+class ChatMessages(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
+    def get_queryset(self):
+        pk = self.kwargs['pk']
+        chat_private = PrivateChat.objects.get(id=pk)
+        queryset = self.queryset
+        if isinstance(queryset, QuerySet):
+            # Ensure queryset is re-evaluated on each request.
+            queryset = queryset.filter(chat_private=chat_private)
+        return queryset
+
+
+class AllPrivateChat(generics.ListAPIView):
+    """ returns all chats from the logged user """
+    
+    permission_classes = [IsAuthenticated]
+    queryset = PrivateChat.objects.all()
+    serializer_class = PrivateChatSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = self.queryset
+        if isinstance(queryset, QuerySet):
+            queryset = queryset.all()
+            queryset = get_authenticated_user_chats(queryset=queryset, user=user)
+        return queryset
+
+# REMOVE
+class AllChatsTEST(generics.ListAPIView):
+
+    permission_classes = [AllowAny]
+    queryset = PrivateChat.objects.all()
+    serializer_class = PrivateChatSerializer
 
 
 """

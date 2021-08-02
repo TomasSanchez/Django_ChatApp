@@ -46,12 +46,6 @@ const SimpleChat = () => {
 		};
 	}
 
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-		if (e.key === "Enter") {
-			handleSubmit();
-		}
-	};
-
 	const handleEnable = () => {
 		setTimeout(() => {
 			console.log("AntiSpam!");
@@ -59,7 +53,8 @@ const SimpleChat = () => {
 		}, 2000);
 	};
 
-	const handleSubmit = () => {
+	const handleSubmit = (e: SyntheticEvent) => {
+		e.preventDefault();
 		if (input.length > 0) {
 			client!.send(JSON.stringify({ message: input, from: displayName }));
 			setInput("");
@@ -107,7 +102,7 @@ const SimpleChat = () => {
 								</div>
 							))}
 						</div>
-						<div className='flex w-full justify-center items-end'>
+						<form onSubmit={handleSubmit} className='flex w-full justify-center items-end'>
 							<div className='relative mr-4 lg:w-full xl:w-1/2 w-2/4 md:w-full text-left mt-9'>
 								<input
 									type='text'
@@ -116,13 +111,12 @@ const SimpleChat = () => {
 									className='w-full bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-green-200 focus:bg-transparent border border-gray-300 focus:border-green-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out'
 									value={input}
 									onChange={(e) => setInput(e.target.value)}
-									onKeyDown={handleKeyDown}
 									disabled={disabled}
 								/>
 							</div>
 							<button
+								type='submit'
 								disabled={disabled}
-								onClick={handleSubmit}
 								className='inline-flex text-white bg-green-500 border-0 py-2 px-6 focus:outline-none hover:bg-green-600 rounded text-lg'>
 								{">"}
 							</button>
@@ -131,7 +125,7 @@ const SimpleChat = () => {
 								className='inline-flex text-white mx-2 bg-green-500 border-0 py-2 px-6 focus:outline-none hover:bg-green-600 rounded text-lg'>
 								Close
 							</button>
-						</div>
+						</form>
 					</div>
 				</div>
 			</section>

@@ -95,7 +95,8 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 
 # for checking if user is loged in
 class WhoAmI(APIView):
-
+    permission_classes = [AllowAny]
+    
     @staticmethod
     def get(request, format=None):
         if request.user.is_authenticated:

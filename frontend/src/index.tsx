@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import About from "./About";
 import App from "./App";
 import Chat from "./Chat";
-import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 import AuthContext from "./context/AuthContext";
 import Login from "./Login";

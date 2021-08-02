@@ -33,6 +33,7 @@ code {
 /* Track */
 ::-webkit-scrollbar-track {
 	background: #495057;
+	/* FFFFF */
 }
 
 /* Handle */

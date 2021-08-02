@@ -8,15 +8,16 @@ const Chat = () => {
 	const [input, setInput] = useState<string>("");
 	const [client, setClient] = useState<W3CWebSocket>();
 	const { id } = useParams<{ id: string }>();
-	const [messages, setMessages] = useState([
-		{ text: "1mas vale", author: "" },
-		{ text: "2Hola como estas", author: "" },
-		{ text: "3asd42134", author: "" },
-	]);
+	// const [messages, setMessages] = useState([
+	// 	{ text: "1mas vale", author: "" },
+	// 	{ text: "2Hola como estas", author: "" },
+	// 	{ text: "3asd42134", author: "" },
+	// ]);
 
 	useEffect(() => {
 		const client = new W3CWebSocket(`ws://127.0.0.1:8000/ws/chat/private/${id}/`);
 		setClient(client);
+		// eslint-disable-next-line
 	}, []);
 
 	if (!isLogedIn) {
@@ -54,11 +55,11 @@ const Chat = () => {
 						<h2 className='text-3xl'>Chat</h2>
 					</div>
 					<div className='w-full md:w-2/3 flex flex-col mb-16 items-center text-center'>
-						<div className='sm:h-96 bg-purple-200 border-2 border-black flex-col-reverse overflow-y-scroll flex w-full h-96'>
+						{/* <div className='sm:h-96 bg-purple-200 border-2 border-black flex-col-reverse overflow-y-scroll flex w-full h-96'>
 							{messages.map((message: any) => (
 								<div className='flex items-start'>{message.text}</div>
 							))}
-						</div>
+						</div> */}
 						<div className='flex w-full justify-center items-end'>
 							<div className='relative mr-4 lg:w-full xl:w-1/2 w-2/4 md:w-full text-left mt-9'>
 								<input

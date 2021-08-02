@@ -7,7 +7,7 @@ const App = () => {
 
 	return (
 		<div>
-			<section className='text-gray-600 body-font relative xl:mt-16 my-5 rounded-lg border border-gray-300 shadow-xl mx-5 bg-gray-100 sm:mx-96'>
+			<section className='text-gray-600 body-font relative xl:mt-16 my-5 rounded-lg border border-gray-300 shadow-xl mx-5 bg-gray-100 sm:mx-20 md:mx-40 xl:mx-96'>
 				<div className=' px-5 py-8 sm:py-24 mx-auto'>
 					<div className='flex flex-col text-center w-full mb-12'>
 						<h1 className='sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900'>
@@ -49,7 +49,7 @@ const App = () => {
 							<div className='p-2 w-full flex justify-center'>
 								<div className='inline-flex bg-green-500 hover:bg-green-600 rounded'>
 									<a
-										href={`/chat/public/${annonName}`}
+										href={`/chat/public?display_name=${annonName}`}
 										className='flex mx-auto text-white  border-0 py-2 px-4 focus:outline-none text-lg'>
 										Enter public room
 									</a>

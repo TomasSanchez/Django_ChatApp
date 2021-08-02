@@ -1,3 +1,5 @@
+import Footer from "./components/Footer";
+
 const About = () => {
 	return (
 		<div>
@@ -292,6 +294,7 @@ const About = () => {
 					</div>
 				</section>
 			</div>
+			<Footer />
 		</div>
 	);
 };

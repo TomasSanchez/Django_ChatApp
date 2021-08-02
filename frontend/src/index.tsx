@@ -24,7 +24,6 @@ ReactDOM.render(
 				<Route exact path='/about' component={About} />
 			</Switch>
 		</Router>
-		<Footer />
 	</AuthContext>,
 
 	document.getElementById("root")

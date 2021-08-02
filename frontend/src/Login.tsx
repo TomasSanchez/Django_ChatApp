@@ -3,6 +3,7 @@ import Cookies from "js-cookie";
 import { useHistory } from "react-router-dom";
 import { ContextAuth } from "./context/AuthContext";
 import axiosInstance from "./context/AxiosConfig";
+import Footer from "./components/Footer";
 
 const Login = () => {
 	const { isLogedIn, setIsLogedIn, csrfToken, setCsrfToken, get_current_user_or_log_out } = useContext(ContextAuth);
@@ -132,7 +133,7 @@ const Login = () => {
 				</div>
 			</section>
 
-			{/* <Footer /> */}
+			<Footer />
 		</div>
 	);
 };

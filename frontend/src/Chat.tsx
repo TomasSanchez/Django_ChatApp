@@ -2,12 +2,14 @@ import { useEffect, useState, useContext } from "react";
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import { useParams } from "react-router-dom";
 import { ContextAuth } from "./context/AuthContext";
+import { useHistory } from "react-router-dom";
 
 const Chat = () => {
 	const { isLogedIn, current_logged_user } = useContext(ContextAuth);
 	const [input, setInput] = useState<string>("");
 	const [client, setClient] = useState<W3CWebSocket>();
 	const { id } = useParams<{ id: string }>();
+	const history = useHistory();
 	// const [messages, setMessages] = useState([
 	// 	{ text: "1mas vale", author: "" },
 	// 	{ text: "2Hola como estas", author: "" },
@@ -19,10 +21,6 @@ const Chat = () => {
 		setClient(client);
 		// eslint-disable-next-line
 	}, []);
-
-	if (!isLogedIn) {
-		// gotohome
-	}
 
 	if (client) {
 		client.onopen = () => {
@@ -46,45 +44,47 @@ const Chat = () => {
 	const handleClose = () => {
 		client!.close();
 	};
-
-	return (
-		<div>
-			<section className='text-gray-600 body-font'>
-				<div className='container mx-auto flex flex-col px-5 py-24 justify-center items-center'>
-					<div className='text-left flex justify-start '>
-						<h2 className='text-3xl'>Chat</h2>
+	// !isLogedIn
+	return false ? (
+		<div className='container mx-auto w-2/3 bg-gray-200 text-gray-800'>
+			<div>Log In to view your chats!</div>
+		</div>
+	) : (
+		// Start of left container
+		<div className='flex flex-row'>
+			<div className='container h-96 w-1/3 bg-red-200  m-auto flex flex-col'>
+				<div className=' hidden sm:flex flex-row text-xs bg-gray-400 px-2 py-4 align-middle justify-start'>
+					{" "}
+					<div className='flex '>
+						<input
+							className='flex rounded-lg bg-gray-300 px-2 py-1 text-gray-900'
+							type='text'
+							placeholder='Search'
+						/>
 					</div>
-					<div className='w-full md:w-2/3 flex flex-col mb-16 items-center text-center'>
-						{/* <div className='sm:h-96 bg-purple-200 border-2 border-black flex-col-reverse overflow-y-scroll flex w-full h-96'>
-							{messages.map((message: any) => (
-								<div className='flex items-start'>{message.text}</div>
-							))}
-						</div> */}
-						<div className='flex w-full justify-center items-end'>
-							<div className='relative mr-4 lg:w-full xl:w-1/2 w-2/4 md:w-full text-left mt-9'>
-								<input
-									type='text'
-									id='hero-field'
-									name='hero-field'
-									className='w-full bg-gray-100 bg-opacity-50 rounded focus:ring-2 focus:ring-green-200 focus:bg-transparent border border-gray-300 focus:border-green-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out'
-									value={input}
-									onChange={(e) => setInput(e.target.value)}
-								/>
+					<button className='hover:text-gray-800 hover:underline align-middle flex'>Search</button>
+				</div>
+				{/* Start of map */}
+				<div className='flex border-t border-gray-300 px-2 py-5 bg-gray-200 hover:bg-gray-300'>
+					<div className='flex flex-col' style={{ width: "-webkit-fill-available" }}>
+						<p className='text-gray-900 '>Name</p>
+						<div className=' flex flex-row text-xs'>
+							<div className='mr-2'>
+								<p>//</p>
 							</div>
-							<button
-								onClick={() => handleSubmit(input)}
-								className='inline-flex text-white bg-green-500 border-0 py-2 px-6 focus:outline-none hover:bg-green-600 rounded text-lg'>
-								{">"}
-							</button>
-							<button
-								onClick={() => handleClose()}
-								className='inline-flex text-white bg-green-500 border-0 py-2 px-6 focus:outline-none hover:bg-green-600 rounded text-lg'>
-								Close
-							</button>
+							<div className='flex text-gray-900 w-3/4'>
+								<p>LastMessage</p>
+							</div>
+							<div className=' sm:block hidden text-gray-900 '>
+								<p>Time</p>
+							</div>
 						</div>
 					</div>
 				</div>
-			</section>
+				{/* end of map */}
+			</div>
+			{/* Start of the right container */}
+			<div className='container h-96 bg-yellow-200 w-full m-auto flex'></div>
 		</div>
 	);
 };

@@ -2,6 +2,12 @@ import { SyntheticEvent, useEffect, useState } from "react";
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import { useLocation } from "react-router-dom";
 
+type messageType = {
+	key: number;
+	text: string;
+	author: string;
+};
+
 const SimpleChat = () => {
 	const [input, setInput] = useState("");
 	const [disabled, setDisabled] = useState(false);
@@ -18,7 +24,7 @@ const SimpleChat = () => {
 	const search = useLocation().search;
 	const displayName = new URLSearchParams(search).get("display_name");
 
-	const updateMessages = (message: any) => {
+	const updateMessages = (message: messageType) => {
 		setMessages((prevMessages) => [message, ...prevMessages]);
 		setKeyNmbr((prev) => prev + 1);
 	};
@@ -81,7 +87,7 @@ const SimpleChat = () => {
 					</div>
 					<div className='w-full md:w-3/4 flex mb-16 flex-col'>
 						<div className='sm:h-96 bg-purple-200 border-2 border-black flex-col-reverse rounded-lg overflow-y-auto w-full flex h-96 pb-2'>
-							{messages.map((message: any) => (
+							{messages.map((message: messageType) => (
 								<div
 									key={message.key}
 									className={`flex flex-grow-1 ${

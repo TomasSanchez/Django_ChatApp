@@ -18,7 +18,7 @@ const App = () => {
 						<div className='flex mx-auto flex-wrap -m-2 justify-center'>
 							<p className='text-center mx-auto mb-2'>
 								Log In to create rooms and have chats with saving messages and basic functionallity.{" "}
-								<br /> Or enter a public room where anyone can join and send messages.
+								<br /> Or enter a generic public room where anyone can join and send messages.
 							</p>
 							{/* <div className='p-2 w-1/2'>
 								<div className='relative'>

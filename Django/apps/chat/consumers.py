@@ -29,7 +29,7 @@ class AsyncPrivateChatConsumer(AsyncWebsocketConsumer):
 
 
     @database_sync_to_async
-    def get_user(self, user_id):
+    def get_user_obj(self, user_id):
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
@@ -49,7 +49,7 @@ class AsyncPrivateChatConsumer(AsyncWebsocketConsumer):
         self.room_group_name = 'chat_%s' % self.room_name
         # FIX Returns Anon while logged in
         usera = await get_user(self.scope)
-        print(f" -------------------------------- User: {self.scope['user']} --------------------------------")
+        print(f" -------------------------------- session: {self.scope['session'].values()} --------------------------------")
         print(f" -------------------------------- Usera: {usera} --------------------------------")
         # gets channel object or closes connection
         self.channel, succes = await self.get_channel(room=self.room_name)
@@ -73,7 +73,8 @@ class AsyncPrivateChatConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         message = data['message']
         # get user
-        user = await self.get_user(user_id=data['user']['id'])
+        user = await self.get_user_obj(user_id=data['user']['id'])
+        print(f" -------------------------------- user.is_authenticated(): {user.is_authenticated} --------------------------------")
         # save message to db
         serialized_data = await self.save_message(author=user, content=message)
         

@@ -5,6 +5,7 @@ import App from "./App";
 import Chat from "./Chat";
 import Navbar from "./components/Navbar";
 import AuthContext from "./context/AuthContext";
+import Dummy from "./Dummy";
 import Login from "./Login";
 import Signup from "./Signup";
 import SimpleChat from "./SimpleChat";
@@ -21,6 +22,7 @@ ReactDOM.render(
 				<Route exact path='/login' component={Login} />
 				<Route exact path='/signup' component={Signup} />
 				<Route exact path='/about' component={About} />
+				<Route exact path='/dummy' component={Dummy} />
 			</Switch>
 		</Router>
 	</AuthContext>,

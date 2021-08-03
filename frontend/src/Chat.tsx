@@ -150,20 +150,20 @@ const Chat = () => {
 
 	// !isLogedIn
 	return false ? (
-		<div className='container mx-auto w-2/3 bg-gray-200 text-gray-800 mt-12 rounded-lg p-4 text-xl'>
+		<div className='container mx-auto w-2/3 bg-gray-200 text-gray-800 mt-12  p-4 text-xl'>
 			<div>Log In to view your chats!</div>
 		</div>
 	) : (
-		<div className='rounded-xl mx-4 my-2 sm:my-10 shadow-lg h-5/6 p-1 bg-gray-500'>
+		<div className='shadow-lg h-93/100 p-1 bg-gray-500'>
 			<div className='flex flex-row items-start h-full '>
 				{/*LEFT panel */}
-				<div className='container w-1/3 bg-gray-300 overflow-y-auto flex flex-col h-full border-r border-gray-400 rounded-xl rounded-r-none '>
+				<div className='container w-1/3 bg-gray-300 overflow-y-auto flex flex-col h-full border-r border-gray-400  rounded-r-none '>
 					{/* Search */}
 					<div className=' hidden sm:flex flex-row text-xs bg-gray-400 px-2 py-4 align-middle justify-start'>
 						{" "}
 						<div className='flex '>
 							<input
-								className='flex rounded-lg bg-gray-300 px-2 py-1 text-gray-900'
+								className='flex bg-gray-300 px-2 py-1 text-gray-900 rounded-lg'
 								type='text'
 								placeholder='Search'
 							/>
@@ -175,8 +175,6 @@ const Chat = () => {
 							CreateTODO
 						</button>
 					</div>
-
-					{/* Start of chats map */}
 					{!chats ? (
 						<div className='p-4'>Loading chats!</div>
 					) : (
@@ -210,26 +208,23 @@ const Chat = () => {
 							</div>
 						))
 					)}
-					{/* end of map */}
 				</div>
 				{/* RIGHT Panel Start of the right container messages view */}
-
 				<div className='flex flex-col h-full  w-full mx-auto '>
 					{!activeChat ? (
-						<div className=' flex flex-col-reverse bg-blue-200 w-full h-full rounded-xl rounded-l-none overflow-y-auto justify-items-center'>
-							<div className='m-auto rounded-xl bg-gray-300 px-3 py-5 text-xl sm:text-2xl md:text-4xl text-gray-600 border-2 border-gray-400 mt-20 mx-5 sm:mx-auto'>
+						<div className=' flex flex-col-reverse bg-blue-200 w-full h-full  rounded-l-none overflow-y-auto justify-items-center'>
+							<div className='m-auto  bg-gray-300 px-3 py-5 text-xl sm:text-2xl md:text-4xl text-gray-600 border-2 border-gray-400 mt-20 mx-5 sm:mx-auto'>
 								Select a chat to show messages
 							</div>
 						</div>
 					) : (
 						<>
-							<div className='h-16 bg-gray-200 w-full rounded-xl rounded-l-none rounded-b-none flex'>
+							<div className='h-16 bg-gray-200 w-full  rounded-l-none rounded-b-none flex shadow-md border-b border-gray-300'>
 								<div className='my-2 mx-1 p-2 rounded-lg'>
 									{chats!.find((chat) => chat.id === activeChat)?.group_name}
 								</div>
 							</div>
-							<div className=' flex flex-col-reverse bg-blue-200 w-full h-full rounded-xl rounded-l-none rounded-b-none rounded-t-none overflow-y-auto'>
-								{/* beggining of map */}
+							<div className=' flex flex-col-reverse bg-blue-200 w-full h-full  rounded-l-none rounded-b-none rounded-t-none overflow-y-auto'>
 								{!messages ? (
 									<div className=''>Loading Messages</div>
 								) : (
@@ -259,12 +254,11 @@ const Chat = () => {
 										</div>
 									))
 								)}
-								{/* end of map */}
 							</div>
 							{/* Input field and submit */}
 							<form
 								onSubmit={handleSubmit}
-								className='h-16 bg-gray-200 w-full rounded-xl rounded-l-none rounded-t-none flex'>
+								className='h-16 bg-gray-200 w-full  rounded-l-none rounded-t-none flex'>
 								<input
 									className='w-11/12 my-2 mx-1 p-2 rounded-lg border border-gray-300 bg-gray-100'
 									type='text'

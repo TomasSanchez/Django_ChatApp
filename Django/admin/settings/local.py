@@ -26,8 +26,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5000",
     "http://172.18.0.3:3000",
     "http://localhost:3000",
-    "http://172.*.*.*:3000"
-
+    "http://172.*.*.*:3000",
 ]
 
 CORS_ALLOW_HEADERS = ['content-disposition', 'accept-encoding',

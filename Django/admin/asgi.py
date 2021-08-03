@@ -11,6 +11,8 @@ from channels.sessions import SessionMiddlewareStack
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'admin.settings')
 
+django_asgi_app = get_asgi_application()
+
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(

@@ -19,7 +19,6 @@ def get_authenticated_user_chats(queryset, user):
     query = []
     for chat in queryset:
         if user in chat.users.all():
-            print(f"True {user} is in {chat}")
             query.append(chat)
     return query
 
@@ -55,8 +54,6 @@ class AllMessages(generics.ListAPIView):
             query = []
             chat_query = get_authenticated_user_chats(queryset=chats, user=user)
             queryset = queryset.all()
-            print(f"------------------------------------------ \n << chat_query: \n{chat_query} \n >> \n------------------------------------------")
-            print(f"------------------------------------------ \n << queryset: \n{queryset} \n >> \n------------------------------------------")
             for chat in chat_query:
                 chat.private_chat_message.all()
 
@@ -74,7 +71,7 @@ class ChatMessages(generics.ListAPIView):
         queryset = self.queryset
         if isinstance(queryset, QuerySet):
             # Ensure queryset is re-evaluated on each request.
-            queryset = queryset.filter(chat_private=chat_private)
+            queryset = queryset.filter(chat_private=chat_private).order_by('-created_at')
         return queryset
 
 

@@ -5,7 +5,8 @@ from .serializers import MessageSerializer
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-
+from channels.layers import get_channel_layer
+from channels.auth import get_user
 
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
@@ -155,27 +156,6 @@ class AsyncPublicChatConsumer(AsyncWebsocketConsumer):
 
 
 """
-
-author_data = {
-            'user_id': user.id,
-            'user_name': user.user_name, 
-            'first_name': user.first_name, 
-            'last_name': user.last_name
-        }
-        private_chat = {
-            'chat_id': self.channel.id,
-            'chat_name': self.channel.group_name,
-            'created_at': self.channel.created_at
-        }
-        data = {
-            'id': saved_message.id, 
-            'author': author_data, 
-            'created_at': saved_message.created_at, 
-            'content': saved_message.content, 
-            'private_chat': private_chat
-        }
-
-
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']

@@ -3,20 +3,26 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 import { ContextAuth } from "./context/AuthContext";
 import axiosInstance from "./context/AxiosConfig";
 
+type messageChatType = {
+	id: string;
+	group_name: string;
+	created_at: string;
+};
+
 type userType = {
-	user_id: number;
+	user_id: string;
 	user_name: string;
 	first_name: string;
 	last_name: string;
 };
 
 type messageType = {
-	id: number;
+	id: string;
 	author: userType;
 	created_at: string;
 	content: string;
 	chat_group_id: number | null;
-	chat_private_id: number | null;
+	private_chat: messageChatType;
 };
 
 type chatType = {
@@ -29,12 +35,12 @@ type chatType = {
 
 const Chat = () => {
 	const { isLogedIn, csrfToken, current_logged_user } = useContext(ContextAuth);
-	const [input, setInput] = useState<string>("");
-	const [chats, setChats] = useState<chatType[]>();
-	const [disabled, setDisabled] = useState(false);
-	const [activeChat, setActiveChat] = useState<string>();
-	const [messages, setMessages] = useState<messageType[]>();
-	const [client, setClient] = useState<W3CWebSocket>();
+	const [input, setInput] = useState<string>(""); // input text from chat view
+	const [chats, setChats] = useState<chatType[]>(); // All the chats/groups without their messages
+	const [disabled, setDisabled] = useState(false); // Disables input for 2 seconds after enter to prevent spaming
+	const [activeChat, setActiveChat] = useState<string>(); // Current chat to show messages from
+	const [messages, setMessages] = useState<messageType[]>(); // Messages of a specific chat/group
+	const [client, setClient] = useState<W3CWebSocket>(); // websocket client
 
 	// gets called on page open, gets all chats from current loged user
 	const getChats = async () => {
@@ -99,7 +105,12 @@ const Chat = () => {
 	}
 
 	const updateMessages = (message: messageType) => {
+		console.log("incoming message:", message);
 		setMessages((prevMessages) => [message, ...prevMessages!]);
+		const current_chat = chats?.find((chat) => chat.id === message.private_chat.id);
+		current_chat!.messages.content = message.content;
+		current_chat!.messages.author = message.author;
+		current_chat!.messages.created_at = message.created_at;
 	};
 
 	const handleEnable = () => {
@@ -133,8 +144,8 @@ const Chat = () => {
 		}
 	};
 
-	const comparing_author = (author_id: number) => {
-		return author_id === current_logged_user!.id;
+	const comparing_author = (author_id: string) => {
+		return parseInt(author_id) === current_logged_user!.id;
 	};
 
 	// !isLogedIn
@@ -180,12 +191,20 @@ const Chat = () => {
 										<div className='mr-2'>
 											<p>{"//"}</p>
 										</div>
-										{/* <div className='flex text-gray-900 w-3/4'>
-											<p className='h-4 overflow-hidden'>{chat.messages.content}</p>
+										<div className='flex text-gray-900 w-3/4'>
+											<p className='h-4 overflow-hidden'>
+												{parseInt(chat.messages.id) > 0
+													? chat.messages.author.user_name + ": " + chat.messages.content
+													: "No messages yet"}
+											</p>
 										</div>
 										<div className=' sm:block hidden text-gray-900 justify-self-end '>
-											<p>{chat.messages.created_at.split("T")[0].split(".")[0].slice(0, 5)}</p>
-										</div> */}
+											<p>
+												{parseInt(chat.messages.id) > 0
+													? chat.messages.created_at.split("T")[1].split(".")[0].slice(0, 5)
+													: ""}
+											</p>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -197,14 +216,19 @@ const Chat = () => {
 
 				<div className='flex flex-col h-full  w-full mx-auto '>
 					{!activeChat ? (
-						<div className=' flex flex-col-reverse bg-blue-200 w-full h-full rounded-xl rounded-l-none rounded-b-none overflow-y-auto justify-items-center'>
+						<div className=' flex flex-col-reverse bg-blue-200 w-full h-full rounded-xl rounded-l-none overflow-y-auto justify-items-center'>
 							<div className='m-auto rounded-xl bg-gray-300 px-3 py-5 text-xl sm:text-2xl md:text-4xl text-gray-600 border-2 border-gray-400 mt-20 mx-5 sm:mx-auto'>
 								Select a chat to show messages
 							</div>
 						</div>
 					) : (
 						<>
-							<div className=' flex flex-col-reverse bg-blue-200 w-full h-full rounded-xl rounded-l-none rounded-b-none overflow-y-auto'>
+							<div className='h-16 bg-gray-200 w-full rounded-xl rounded-l-none rounded-b-none flex'>
+								<div className='my-2 mx-1 p-2 rounded-lg'>
+									{chats!.find((chat) => chat.id === activeChat)?.group_name}
+								</div>
+							</div>
+							<div className=' flex flex-col-reverse bg-blue-200 w-full h-full rounded-xl rounded-l-none rounded-b-none rounded-t-none overflow-y-auto'>
 								{/* beggining of map */}
 								{!messages ? (
 									<div className=''>Loading Messages</div>
@@ -219,12 +243,17 @@ const Chat = () => {
 											key={message.id}>
 											<div
 												className={`mx-2 my-1 items-start px-2 py-3 rounded-md border max-w-xs sm:max-w-sm md:max-w-md xl:max-w-xl flex-grow-0  border-gray-300 bg-gray-200 min-w-0 text-left shadow-xs`}>
-												<p className='text-xs text-gray-500'>
-													From:{" "}
-													{comparing_author(message.author.user_id)
-														? "You"
-														: "From: " + message.author.user_name}
-												</p>
+												<div className='text-xs text-gray-500 flex'>
+													<p className='flex w-8/12'>
+														{comparing_author(message.author.user_id)
+															? "You"
+															: "From: " + message.author.user_name}{" "}
+													</p>
+													<p className='inline-flex ml-1'>
+														{" " +
+															message.created_at.split("T")[1].split(".")[0].slice(0, 5)}
+													</p>
+												</div>
 												<p className='text-black'>{message.content}</p>
 											</div>
 										</div>

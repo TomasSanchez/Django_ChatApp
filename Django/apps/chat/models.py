@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 class Message(models.Model):
     
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name='user_message')
-    created_at = models.TimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     content = models.TextField(_('content'))
     chat_group = models.ForeignKey('GroupChat', on_delete=models.CASCADE, blank=True, null=True, related_name='group_chat_message')
     chat_private = models.ForeignKey('PrivateChat', on_delete=models.CASCADE, blank=True, null=True, related_name='private_chat_message')
@@ -23,7 +23,7 @@ class GroupChat(models.Model):
 
     group_name = models.CharField(max_length=100, unique=True)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='group_chat_member')
-    created_at = models.TimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:     
         ordering = ["-created_at"]
@@ -35,7 +35,7 @@ class PrivateChat(models.Model):
  
     group_name = models.CharField(max_length=100, unique=True)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='chat_user')
-    created_at = models.TimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-created_at"]

@@ -10,7 +10,7 @@ env = environ.Env()
 env.read_env(str(BASE_DIR / ".env.local"))
 
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Argentina/Buenos_Aires"
 
 LANGUAGE_CODE = "en-us"
 

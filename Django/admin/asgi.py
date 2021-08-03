@@ -9,16 +9,15 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from channels.sessions import SessionMiddlewareStack
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'admin.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'admin.settings.local')
 
-django_asgi_app = get_asgi_application()
+application = get_asgi_application()
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
         URLRouter(
             apps.chat.routing.websocket_urlpatterns
-            # re_path(r"^front(end)/$", consumers.AsyncChatConsumer.as_asgi()),
         )
     ),
 })

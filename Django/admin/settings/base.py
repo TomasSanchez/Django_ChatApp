@@ -29,7 +29,7 @@ ROOT_URLCONF = 'admin.urls'
 
 WSGI_APPLICATION = "admin.wsgi.application"
 
-ASGI_APPLICATION = 'admin.asgi.application'
+ASGI_APPLICATION = "admin.asgi.application"
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -89,8 +89,6 @@ TEMPLATES = [
         },
     },
 ]
-
-WSGI_APPLICATION = 'admin.wsgi.application'
 
 DATABASES = {
     'default': {

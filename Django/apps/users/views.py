@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
+from channels.auth import login as channels_login
 
 class CreateUser(APIView):
     permission_classes = [AllowAny]
@@ -49,6 +50,7 @@ def login_view(request):
 
     if user is not None:
         login(request, user)
+        channels_login(request, user)
         return JsonResponse({"detail": "User logged in successfully"})
     return JsonResponse({"detail": "Invalid credentials"}, status=400)
 
@@ -96,7 +98,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 # for checking if user is loged in
 class WhoAmI(APIView):
     permission_classes = [AllowAny]
-    
+
     @staticmethod
     def get(request, format=None):
         if request.user.is_authenticated:

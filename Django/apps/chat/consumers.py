@@ -47,7 +47,10 @@ class AsyncPrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = 'chat_%s' % self.room_name
-        
+        # FIX Returns Anon while logged in
+        usera = await get_user(self.scope)
+        print(f" -------------------------------- User: {self.scope['user']} --------------------------------")
+        print(f" -------------------------------- Usera: {usera} --------------------------------")
         # gets channel object or closes connection
         self.channel, succes = await self.get_channel(room=self.room_name)
 

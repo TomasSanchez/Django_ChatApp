@@ -148,13 +148,12 @@ const Chat = () => {
 		return parseInt(author_id) === current_logged_user!.id;
 	};
 
-	// !isLogedIn
-	return false ? (
+	return !isLogedIn ? (
 		<div className='container mx-auto w-2/3 bg-gray-200 text-gray-800 mt-12  p-4 text-xl'>
 			<div>Log In to view your chats!</div>
 		</div>
 	) : (
-		<div className='shadow-lg h-93/100 p-1 bg-gray-500'>
+		<div className=' md:h-93/100 p-1 bg-gray-500  h-80/100'>
 			<div className='flex flex-row items-start h-full '>
 				{/*LEFT panel */}
 				<div className='container w-1/3 bg-gray-300 overflow-y-auto flex flex-col h-full border-r border-gray-400  rounded-r-none '>
@@ -232,8 +231,8 @@ const Chat = () => {
 										<div
 											className={`flex flex-grow-1 ${
 												comparing_author(message.author.user_id)
-													? "justify-end"
-													: "justify-start"
+													? "justify-end mr-10"
+													: "justify-start ml-10"
 											} `}
 											key={message.id}>
 											<div

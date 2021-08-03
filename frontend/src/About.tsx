@@ -3,8 +3,8 @@ import Footer from "./components/Footer";
 const About = () => {
 	return (
 		<div>
-			<div className='text-black px-5 pt-5 sm:mt-24 mb-5 flex flex-wrap items-center justify-center'>
-				<section className='body-font rounded-lg shadow-xl border border-gray-300 bg-gray-100 '>
+			<div className='text-black px-5 pt-5 md:mt-16 lg:mt-24 mb-5 flex flex-wrap items-center justify-center'>
+				<section className='body-font rounded-lg shadow-xl border border-gray-300 bg-gray-100 md:w-5/6'>
 					<div className=' px-2 py-5 mx-auto'>
 						<div className='lg:w-3/4 mx-auto text-center'>
 							<svg

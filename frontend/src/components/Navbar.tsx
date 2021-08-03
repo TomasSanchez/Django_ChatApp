@@ -24,15 +24,14 @@ const Navbar = () => {
 	};
 
 	return (
-		<div className='border-b border-gray-500 shadow h-7/100 flex w-full'>
-			<header className='text-black bg-gray-200 body-font w-full'>
+		<div className='border-b border-gray-500 shadow md:h-7/100 h-20/100 flex w-full'>
+			<header className='text-black bg-gray-200 body-font w-full h-full'>
 				<div className='container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center'>
 					<a href='/' className='flex title-font font-medium items-center text-black mb-4 md:mb-0'>
 						<span className='ml-3 text-xl'>Home</span>
 					</a>
 					<nav className='md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-700	flex flex-wrap items-center text-base justify-center'>
-						{/* isLogedIn */}
-						{true && (
+						{isLogedIn && (
 							<a href='/chat' className='mr-5 hover:text-black text-gray-700'>
 								MyChats
 							</a>

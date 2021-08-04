@@ -55,9 +55,10 @@ const Chat = () => {
 	const [input, setInput] = useState<string>(""); // input text from chat view
 	const [chats, setChats] = useState<chatType[]>(); // All the chats/groups without their messages
 	const [client, setClient] = useState<W3CWebSocket>(); // websocket client
-	const [disabled, setDisabled] = useState(false); // Disables input for 2 seconds after enter to prevent spaming
+	const [disabled, setDisabled] = useState<boolean>(false); // Disables input for 2 seconds after enter to prevent spaming
 	const [messages, setMessages] = useState<messageType[]>(); // Messages of a specific chat/group
 	const [activeChat, setActiveChat] = useState<string>(); // Current chat to show messages from
+	const [joinGroupName, setJoinGroupName] = useState<string>(""); // input text from search view
 	const [newGroupName, setNewGroupName] = useState<string>(""); // input text from search view
 	const [wsConectingError, setWsConectingError] = useState(wsErrors[0]); // Display current connection status
 
@@ -119,6 +120,45 @@ const Chat = () => {
 			});
 
 			if (response.status === 201) {
+				setNewGroupName("");
+				getChats();
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const joinGroup = async (chatName: string) => {
+		try {
+			const response = await axiosInstance(`/api/chat/join/${chatName}`, {
+				headers: {
+					"Content-Type": "application/json",
+					"X-CSRFToken": csrfToken,
+				},
+				withCredentials: true,
+				method: "PUT",
+			});
+
+			if (response.status === 202) {
+				getChats();
+				setJoinGroupName("");
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const deleteGroup = async (chatId: string) => {
+		try {
+			const response = await axiosInstance(`/api/chat/delete/${chatId}`, {
+				headers: {
+					"Content-Type": "application/json",
+					"X-CSRFToken": csrfToken,
+				},
+				withCredentials: true,
+				method: "DELETE",
+			});
+			if (response.status === 204) {
 				getChats();
 			}
 		} catch (error) {
@@ -159,8 +199,16 @@ const Chat = () => {
 		current_chat!.messages.created_at = message.created_at;
 	};
 
+	const handleDelete = (chatId: string) => {
+		deleteGroup(chatId);
+	};
+
 	const handleCreate = (chatName: string) => {
 		createGroup(chatName);
+	};
+
+	const handleJoin = (chatName: string) => {
+		joinGroup(chatName);
 	};
 
 	const handleEnable = () => {
@@ -199,8 +247,7 @@ const Chat = () => {
 		return parseInt(author_id) === current_logged_user!.id;
 	};
 
-	// !isLogedIn;
-	return false ? (
+	return !isLogedIn ? (
 		<div className='container mx-auto w-2/3 bg-gray-200 text-gray-800 mt-12  p-4 text-xl'>
 			<div>Log In to view your chats!</div>
 		</div>
@@ -212,7 +259,8 @@ const Chat = () => {
 					{/* Search */}
 					<div className=' hidden sm:flex flex-row text-xs bg-gray-400 px-2 py-4 align-middle justify-start'>
 						{" "}
-						<div className='flex '>
+						{/* CREATE GROUP */}
+						<div className='flex'>
 							<input
 								className='flex bg-gray-300 px-2 py-1 text-gray-900 rounded-lg'
 								type='text'
@@ -222,11 +270,11 @@ const Chat = () => {
 							/>
 						</div>
 						<button
-							className='hover:text-gray-800 hover:underline align-middle hidden md:flex p-1 ml-2'
+							className='hover:text-gray-800 hover:underline align-middle flex p-1 ml-2'
 							onClick={() => handleCreate(newGroupName)}>
 							<svg
 								xmlns='http://www.w3.org/2000/svg'
-								className='h-6 w-6'
+								className='h-4 w-4 hover:text-gray-600'
 								fill='none'
 								viewBox='0 0 24 24'
 								stroke='currentColor'>
@@ -235,6 +283,33 @@ const Chat = () => {
 									strokeLinejoin='round'
 									strokeWidth={2}
 									d='M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z'
+								/>
+							</svg>
+						</button>
+						{/* JOIN GROUP */}
+						<div className='flex ml-4'>
+							<input
+								className='flex bg-gray-300 px-2 py-1 text-gray-900 rounded-lg'
+								type='text'
+								placeholder='Join Group'
+								value={joinGroupName}
+								onChange={(e) => setJoinGroupName(e.target.value)}
+							/>
+						</div>
+						<button
+							className='hover:text-gray-800 hover:underline align-middle flex p-1 ml-2'
+							onClick={() => handleJoin(joinGroupName)}>
+							<svg
+								xmlns='http://www.w3.org/2000/svg'
+								className='h-4 w-4 hover:text-gray-600'
+								fill='none'
+								viewBox='0 0 24 24'
+								stroke='currentColor'>
+								<path
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeWidth={2}
+									d='M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z'
 								/>
 							</svg>
 						</button>
@@ -285,9 +360,27 @@ const Chat = () => {
 								<div className='mx-1 p-2 '>
 									{chats!.find((chat) => chat.id === activeChat)?.group_name}
 								</div>
-								<div className='mx-1 p-2 text-sm'>
-									Status:{" "}
-									{wsConectingError.readyState === client!.readyState && wsConectingError.error}
+								<div className='flex'>
+									<button onClick={() => handleDelete(activeChat)}>
+										{/* {activeChat} */}
+										<svg
+											xmlns='http://www.w3.org/2000/svg'
+											className='h-4 w-4 hover:text-gray-600'
+											fill='none'
+											viewBox='0 0 24 24'
+											stroke='currentColor'>
+											<path
+												strokeLinecap='round'
+												strokeLinejoin='round'
+												strokeWidth={2}
+												d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+											/>
+										</svg>
+									</button>
+									<div className='mx-1 p-2 text-sm'>
+										Status:{" "}
+										{wsConectingError.readyState === client!.readyState && wsConectingError.error}
+									</div>
 								</div>
 							</div>
 							<div className=' flex flex-col-reverse bg-blue-200 w-full h-full  rounded-l-none rounded-b-none rounded-t-none overflow-y-auto'>

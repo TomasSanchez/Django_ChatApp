@@ -69,7 +69,7 @@ const Login = () => {
 					<div className='lg:w-3/5 md:w-1/2 md:pr-16 lg:pr-0 pr-0'>
 						<h1 className='title-font font-medium text-3xl text-black'>Log In!</h1>
 						<p className='leading-relaxed mt-4'>
-							Basic Blog by{" "}
+							Basic Chat by{" "}
 							<a
 								href='https://github.com/TomasSanchez'
 								className='hover:text-gray-100 ml-1'

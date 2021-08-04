@@ -33,6 +33,17 @@ type chatType = {
 	users: userType[];
 };
 
+const orderByLastMessage: (chats: chatType[]) => chatType[] = (chats: chatType[]) => {
+	let new_chats = chats.sort((firstEl, secondEl) =>
+		firstEl.messages.created_at < secondEl.messages.created_at
+			? 1
+			: secondEl.messages.created_at < firstEl.messages.created_at
+			? -1
+			: 0
+	);
+	return new_chats;
+};
+
 const Chat = () => {
 	const wsErrors = [
 		{ error: "Connecting", readyState: 0 },
@@ -48,7 +59,7 @@ const Chat = () => {
 	const [messages, setMessages] = useState<messageType[]>(); // Messages of a specific chat/group
 	const [activeChat, setActiveChat] = useState<string>(); // Current chat to show messages from
 	const [newGroupName, setNewGroupName] = useState<string>(""); // input text from search view
-	const [wsConectingError, setWsConectingError] = useState(wsErrors[0]);
+	const [wsConectingError, setWsConectingError] = useState(wsErrors[0]); // Display current connection status
 
 	// gets called on page open, gets all chats from current loged user
 	const getChats = async () => {
@@ -62,13 +73,17 @@ const Chat = () => {
 			});
 
 			if (response.status === 200) {
-				console.log("data: ", response.data);
+				console.log(response.data);
 				setChats(response.data);
 			}
 		} catch (error) {
 			console.error(error);
 		}
 	};
+
+	if (chats) {
+		orderByLastMessage(chats!);
+	}
 
 	// gets called upong click of chat and gets all messages of selected chat
 	const getMessages = async (id: string) => {
@@ -184,7 +199,8 @@ const Chat = () => {
 		return parseInt(author_id) === current_logged_user!.id;
 	};
 
-	return !isLogedIn ? (
+	// !isLogedIn;
+	return false ? (
 		<div className='container mx-auto w-2/3 bg-gray-200 text-gray-800 mt-12  p-4 text-xl'>
 			<div>Log In to view your chats!</div>
 		</div>
@@ -200,26 +216,11 @@ const Chat = () => {
 							<input
 								className='flex bg-gray-300 px-2 py-1 text-gray-900 rounded-lg'
 								type='text'
-								placeholder='Search'
+								placeholder='New Group Name'
 								value={newGroupName}
 								onChange={(e) => setNewGroupName(e.target.value)}
 							/>
 						</div>
-						<button className='hover:text-gray-800 hover:underline align-middle hidden md:flex p-1'>
-							<svg
-								xmlns='http://www.w3.org/2000/svg'
-								className='h-6 w-6'
-								fill='none'
-								viewBox='0 0 24 24'
-								stroke='currentColor'>
-								<path
-									strokeLinecap='round'
-									strokeLinejoin='round'
-									strokeWidth={2}
-									d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
-								/>
-							</svg>
-						</button>
 						<button
 							className='hover:text-gray-800 hover:underline align-middle hidden md:flex p-1 ml-2'
 							onClick={() => handleCreate(newGroupName)}>
@@ -244,24 +245,20 @@ const Chat = () => {
 						chats!.map((chat: chatType) => (
 							<div
 								key={chat.id}
-								className='flex border-t border-gray-300 px-2 py-5 bg-gray-200 hover:bg-gray-100'
+								className='flex border-t border-gray-300 px-2 py-3 sm:py-5 bg-gray-200 hover:bg-gray-100'
 								onClick={() => handleChatView(chat.id)}>
 								<div className='flex flex-col' style={{ width: "-webkit-fill-available" }}>
 									<p className='text-gray-900 h-6 overflow-hidden '>{chat.group_name}</p>
-									<div className=' flex flex-row text-xs justify-between'>
-										<div className='flex'>
-											<div className='mr-2'>
-												<p>{"//"}</p>
-											</div>
-											<div className='text-gray-900 w-3/4'>
-												<p className='h-4 overflow-hidden'>
-													{parseInt(chat.messages.id) > 0
-														? chat.messages.author.user_name + ": " + chat.messages.content
-														: "No messages yet"}
-												</p>
-											</div>
+									<div className=' sm:flex sm:flex-row text-xs justify-between'>
+										<div className='text-gray-900 overflow-hidden'>
+											<p className='h-4'>
+												{"//  "}
+												{parseInt(chat.messages.id) > 0
+													? chat.messages.author.user_name + ": " + chat.messages.content
+													: "No messages yet"}
+											</p>
 										</div>
-										<div className=' sm:block hidden text-gray-900'>
+										<div className=' text-gray-900 sm:ml-4 pt-1 sm:pt-0'>
 											<p>
 												{parseInt(chat.messages.id) > 0
 													? chat.messages.created_at.split("T")[1].split(".")[0].slice(0, 5)

@@ -19,7 +19,7 @@ class PrivateChatSerializer(serializers.ModelSerializer):
     def get_messages(self, obj):
         if len(obj.private_chat_message.all()) > 0 :
             return MessageSerializer(obj.private_chat_message.all()[0], many=False).data
-        return {'id': -1}
+        return {'id': -1, 'created_at': ""}
             
 
 class PrivateChatSmallSerializer(serializers.ModelSerializer):

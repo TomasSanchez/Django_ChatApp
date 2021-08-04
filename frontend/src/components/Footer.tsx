@@ -1,9 +1,9 @@
 const Footer = () => {
 	return (
-		<div className='absolute bottom-0 w-full flex h-7/100'>
-			<div className='border-t border-gray-500 shadow w-full'>
-				<footer className='text-black bg-gray-200 body-font'>
-					<div className='container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col'>
+		<div className='sm:absolute sm:bottom-0 w-full flex md:h-7/100 h-20/100'>
+			<div className='border-t border-gray-500 bg-gray-200 shadow w-full'>
+				<footer className='text-black body-font'>
+					<div className='container px-5 py-4 mx-auto flex items-center sm:flex-row flex-col'>
 						<div className='flex title-font font-medium items-center md:justify-start justify-center text-white'>
 							<svg
 								width='25'

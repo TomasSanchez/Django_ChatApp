@@ -1,6 +1,7 @@
 import { SyntheticEvent, useEffect, useState } from "react";
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import { useLocation } from "react-router-dom";
+import Footer from "./components/Footer";
 
 type messageType = {
 	key: number;
@@ -129,6 +130,7 @@ const SimpleChat = () => {
 					</div>
 				</div>
 			</section>
+			<Footer />
 		</div>
 	);
 };

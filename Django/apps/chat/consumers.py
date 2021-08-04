@@ -47,10 +47,7 @@ class AsyncPrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = 'chat_%s' % self.room_name
-        # FIX Returns Anon while logged in
-        usera = await get_user(self.scope)
-        print(f" -------------------------------- session: {self.scope['session'].values()} --------------------------------")
-        print(f" -------------------------------- Usera: {usera} --------------------------------")
+        
         # gets channel object or closes connection
         self.channel, succes = await self.get_channel(room=self.room_name)
 
@@ -74,7 +71,11 @@ class AsyncPrivateChatConsumer(AsyncWebsocketConsumer):
         message = data['message']
         # get user
         user = await self.get_user_obj(user_id=data['user']['id'])
-        print(f" -------------------------------- user.is_authenticated(): {user.is_authenticated} --------------------------------")
+        
+        # as of scope['user'] not working, semi solution is to check if the user is authenticated when sending a message
+        if not user.is_authenticated:
+            await self.send(text_data=json.dumps('User not authenticated'))
+            await self.close()
         # save message to db
         serialized_data = await self.save_message(author=user, content=message)
         

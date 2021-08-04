@@ -1,10 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.db.models import query
-from django.shortcuts import render, get_object_or_404
-from django.http.response import JsonResponse
 from django.db.models.query import QuerySet
+from django.http.response import JsonResponse
 
-from rest_framework import generics, filters
+from rest_framework import generics, serializers, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated, SAFE_METHODS
 
@@ -33,34 +31,9 @@ class PostUserWritePermission(BasePermission):
         return obj.author == request.user 
 
 
-class AllMessages(generics.ListAPIView):
-    """ returns all messages from current user """
-    
-    permission_classes = [IsAuthenticated]
-    queryset = Message.objects.all()
-    serializer_class = MessageSerializer
-
-    def get_queryset(self):
-        user = self.request.user
-        assert self.queryset is not None, (
-            "'%s' should either include a `queryset` attribute, "
-            "or override the `get_queryset()` method."
-            % self.__class__.__name__
-        )
-        queryset = self.queryset
-        chats = PrivateChat.objects.all()
-
-        if isinstance(queryset, QuerySet):
-            query = []
-            chat_query = get_authenticated_user_chats(queryset=chats, user=user)
-            queryset = queryset.all()
-            for chat in chat_query:
-                chat.private_chat_message.all()
-
-        return queryset
-
-
 class ChatMessages(generics.ListAPIView):
+    """ Returns all messages from a given chat/group"""
+
     permission_classes = [IsAuthenticated]
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
@@ -70,14 +43,12 @@ class ChatMessages(generics.ListAPIView):
         chat_private = PrivateChat.objects.get(id=pk)
         queryset = self.queryset
         if isinstance(queryset, QuerySet):
-            # Ensure queryset is re-evaluated on each request.
             queryset = queryset.filter(chat_private=chat_private).order_by('-created_at')
         return queryset
 
 
-class AllPrivateChat(generics.ListAPIView):
-    """ returns all chats from the logged user """
-    
+class UserPrivateChats(generics.ListAPIView):
+
     permission_classes = [IsAuthenticated]
     queryset = PrivateChat.objects.all()
     serializer_class = PrivateChatSerializer
@@ -90,12 +61,90 @@ class AllPrivateChat(generics.ListAPIView):
             queryset = get_authenticated_user_chats(queryset=queryset, user=user)
         return queryset
 
+
+class CreateGroupChat(generics.CreateAPIView):
+
+    permission_classes = [IsAuthenticated]
+    queryset = PrivateChat.objects.all()
+    serializer_class = PrivateChatSerializer
+
+    def create(self, request, *args, **kwargs):
+        user = self.request.user
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        instance.users.add(user)
+        instance.save()
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class JoinGroupChat(generics.UpdateAPIView):
+    """ Joins user to a chat, or adds another user to chat """
+    
+    permission_classes = [IsAuthenticated]
+    queryset = PrivateChat.objects.all()
+    serializer_class = PrivateChatSerializer
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        user = self.request.user
+        if user in instance.users.all():
+            print('user already in group!')
+            instance.users.remove(user.id)
+            print(f'{user} has joined the group')
+            response = f"{user.user_name} has joined the group"
+        else:
+            print('user not in group')    
+            instance.likes.add(user.id)
+            instance.users.add(user)
+            print(f'{user} has left the group')
+            response = f"{user.user_name} has left the group"
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+        return Response({"data":serializer.data,  "Info": response})
+
+    def perform_update(self, serializer):
+        serializer.save()
+
+
+
+
+
 # REMOVE
 class AllChatsTEST(generics.ListAPIView):
 
     permission_classes = [AllowAny]
     queryset = PrivateChat.objects.all()
     serializer_class = PrivateChatSerializer
+
+
+class AllMessages(generics.ListAPIView):
+    """ returns all messages from current user """
+    
+    permission_classes = [IsAuthenticated]
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = self.queryset
+        chats = PrivateChat.objects.all()
+
+        if isinstance(queryset, QuerySet):
+            query = []
+            chat_query = get_authenticated_user_chats(queryset=chats, user=user)
+            queryset = queryset.all()
+            for chat in chat_query:
+                chat.private_chat_message.all()
+
+        return queryset
 
 
 """
@@ -116,51 +165,5 @@ datetime.datetime(2021, 7, 30, 19, 52, 40, 785711, tzinfo=<UTC>), 'about': None,
 <QuerySet [{'id': 1, 'author_id': 1, 'created_at': datetime.time(19, 49, 46, 161604), 'content': 'First!', 'chat_group_id': 1, 'chat_private_id': None}]>
 >>> 
 
-
-"""
-
-# 
-
-
-
-
-
-"""
-@database_sync_to_async
-def get_user(scope):
-    
-    Return the user model instance associated with the given scope.
-    If no user is retrieved, return an instance of `AnonymousUser`.
-    
-    # postpone model import to avoid ImproperlyConfigured error before Django
-    # setup is complete.
-    from django.contrib.auth.models import AnonymousUser
-
-    if "session" not in scope:
-        raise ValueError(
-            "Cannot find session in scope. You should wrap your consumer in "
-            "SessionMiddleware."
-        )
-    session = scope["session"]
-    user = None
-    try:
-        user_id = _get_user_session_key(session)
-        backend_path = session[BACKEND_SESSION_KEY]
-    except KeyError:
-        pass
-    else:
-        if backend_path in settings.AUTHENTICATION_BACKENDS:
-            backend = load_backend(backend_path)
-            user = backend.get_user(user_id)
-            # Verify the session
-            if hasattr(user, "get_session_auth_hash"):
-                session_hash = session.get(HASH_SESSION_KEY)
-                session_hash_verified = session_hash and constant_time_compare(
-                    session_hash, user.get_session_auth_hash()
-                )
-                if not session_hash_verified:
-                    session.flush()
-                    user = None
-    return user or AnonymousUser()
 
 """

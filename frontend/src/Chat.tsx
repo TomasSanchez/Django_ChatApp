@@ -34,13 +34,21 @@ type chatType = {
 };
 
 const Chat = () => {
+	const wsErrors = [
+		{ error: "Connecting", readyState: 0 },
+		{ error: "Connected", readyState: 1 },
+		{ error: "Closing", readyState: 2 },
+		{ error: "Connection Lost", readyState: 3 },
+	];
 	const { isLogedIn, csrfToken, current_logged_user } = useContext(ContextAuth);
 	const [input, setInput] = useState<string>(""); // input text from chat view
 	const [chats, setChats] = useState<chatType[]>(); // All the chats/groups without their messages
-	const [disabled, setDisabled] = useState(false); // Disables input for 2 seconds after enter to prevent spaming
-	const [activeChat, setActiveChat] = useState<string>(); // Current chat to show messages from
-	const [messages, setMessages] = useState<messageType[]>(); // Messages of a specific chat/group
 	const [client, setClient] = useState<W3CWebSocket>(); // websocket client
+	const [disabled, setDisabled] = useState(false); // Disables input for 2 seconds after enter to prevent spaming
+	const [messages, setMessages] = useState<messageType[]>(); // Messages of a specific chat/group
+	const [activeChat, setActiveChat] = useState<string>(); // Current chat to show messages from
+	const [newGroupName, setNewGroupName] = useState<string>(""); // input text from search view
+	const [wsConectingError, setWsConectingError] = useState(wsErrors[0]);
 
 	// gets called on page open, gets all chats from current loged user
 	const getChats = async () => {
@@ -83,6 +91,26 @@ const Chat = () => {
 		}
 	};
 
+	const createGroup = async (chatName: string) => {
+		try {
+			const response = await axiosInstance(`/api/chat/chat/create`, {
+				headers: {
+					"Content-Type": "application/json",
+					"X-CSRFToken": csrfToken,
+				},
+				withCredentials: true,
+				method: "POST",
+				data: JSON.stringify({ group_name: chatName }),
+			});
+
+			if (response.status === 201) {
+				getChats();
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
 	useEffect(() => {
 		getChats();
 		// eslint-disable-next-line
@@ -90,6 +118,7 @@ const Chat = () => {
 
 	if (client) {
 		client.onopen = () => {
+			setWsConectingError(wsErrors[client.readyState]);
 			console.log("OPEN, WebSocket Client Connected");
 		};
 		client.onmessage = (message) => {
@@ -98,9 +127,11 @@ const Chat = () => {
 		};
 		client.onerror = (error) => {
 			console.error("error:", error);
+			setWsConectingError(wsErrors[client.readyState]);
 		};
 		client.onclose = (message) => {
 			console.log("close:", message);
+			setWsConectingError(wsErrors[client.readyState]);
 		};
 	}
 
@@ -113,6 +144,10 @@ const Chat = () => {
 		current_chat!.messages.created_at = message.created_at;
 	};
 
+	const handleCreate = (chatName: string) => {
+		createGroup(chatName);
+	};
+
 	const handleEnable = () => {
 		setTimeout(() => {
 			console.log("AntiSpam!");
@@ -122,7 +157,7 @@ const Chat = () => {
 
 	const handleSubmit = (e: SyntheticEvent) => {
 		e.preventDefault();
-		if (isLogedIn) {
+		if (isLogedIn && client!.readyState) {
 			setDisabled(true);
 			client!.send(JSON.stringify({ message: input, user: current_logged_user }));
 			setInput("");
@@ -137,6 +172,7 @@ const Chat = () => {
 				client.close();
 			}
 			const socketClient = new W3CWebSocket(`ws://127.0.0.1:8000/ws/chat/private/${id}/`);
+			setWsConectingError(wsErrors[socketClient.readyState]);
 			setClient(socketClient);
 			getMessages(id);
 			setActiveChat(id);
@@ -165,13 +201,41 @@ const Chat = () => {
 								className='flex bg-gray-300 px-2 py-1 text-gray-900 rounded-lg'
 								type='text'
 								placeholder='Search'
+								value={newGroupName}
+								onChange={(e) => setNewGroupName(e.target.value)}
 							/>
 						</div>
 						<button className='hover:text-gray-800 hover:underline align-middle hidden md:flex p-1'>
-							SearchTODO
+							<svg
+								xmlns='http://www.w3.org/2000/svg'
+								className='h-6 w-6'
+								fill='none'
+								viewBox='0 0 24 24'
+								stroke='currentColor'>
+								<path
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeWidth={2}
+									d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
+								/>
+							</svg>
 						</button>
-						<button className='hover:text-gray-800 hover:underline align-middle hidden md:flex p-1 ml-2'>
-							CreateTODO
+						<button
+							className='hover:text-gray-800 hover:underline align-middle hidden md:flex p-1 ml-2'
+							onClick={() => handleCreate(newGroupName)}>
+							<svg
+								xmlns='http://www.w3.org/2000/svg'
+								className='h-6 w-6'
+								fill='none'
+								viewBox='0 0 24 24'
+								stroke='currentColor'>
+								<path
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeWidth={2}
+									d='M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z'
+								/>
+							</svg>
 						</button>
 					</div>
 					{!chats ? (
@@ -180,22 +244,24 @@ const Chat = () => {
 						chats!.map((chat: chatType) => (
 							<div
 								key={chat.id}
-								className='flex border-t border-gray-300 px-1 py-5 bg-gray-200 hover:bg-gray-100'
+								className='flex border-t border-gray-300 px-2 py-5 bg-gray-200 hover:bg-gray-100'
 								onClick={() => handleChatView(chat.id)}>
 								<div className='flex flex-col' style={{ width: "-webkit-fill-available" }}>
 									<p className='text-gray-900 h-6 overflow-hidden '>{chat.group_name}</p>
-									<div className=' flex flex-row text-xs'>
-										<div className='mr-2'>
-											<p>{"//"}</p>
+									<div className=' flex flex-row text-xs justify-between'>
+										<div className='flex'>
+											<div className='mr-2'>
+												<p>{"//"}</p>
+											</div>
+											<div className='text-gray-900 w-3/4'>
+												<p className='h-4 overflow-hidden'>
+													{parseInt(chat.messages.id) > 0
+														? chat.messages.author.user_name + ": " + chat.messages.content
+														: "No messages yet"}
+												</p>
+											</div>
 										</div>
-										<div className='flex text-gray-900 w-3/4'>
-											<p className='h-4 overflow-hidden'>
-												{parseInt(chat.messages.id) > 0
-													? chat.messages.author.user_name + ": " + chat.messages.content
-													: "No messages yet"}
-											</p>
-										</div>
-										<div className=' sm:block hidden text-gray-900 justify-self-end '>
+										<div className=' sm:block hidden text-gray-900'>
 											<p>
 												{parseInt(chat.messages.id) > 0
 													? chat.messages.created_at.split("T")[1].split(".")[0].slice(0, 5)
@@ -218,9 +284,13 @@ const Chat = () => {
 						</div>
 					) : (
 						<>
-							<div className='h-16 bg-gray-200 w-full  rounded-l-none rounded-b-none flex shadow-md border-b border-gray-300'>
-								<div className='my-2 mx-1 p-2 rounded-lg'>
+							<div className='h-16 bg-gray-200 w-full  rounded-l-none rounded-b-none flex shadow-md border-b border-gray-300 justify-between align-middle items-center'>
+								<div className='mx-1 p-2 '>
 									{chats!.find((chat) => chat.id === activeChat)?.group_name}
+								</div>
+								<div className='mx-1 p-2 text-sm'>
+									Status:{" "}
+									{wsConectingError.readyState === client!.readyState && wsConectingError.error}
 								</div>
 							</div>
 							<div className=' flex flex-col-reverse bg-blue-200 w-full h-full  rounded-l-none rounded-b-none rounded-t-none overflow-y-auto'>
@@ -236,14 +306,14 @@ const Chat = () => {
 											} `}
 											key={message.id}>
 											<div
-												className={`mx-2 my-1 items-start px-2 py-3 rounded-md border max-w-xs sm:max-w-sm md:max-w-md xl:max-w-xl flex-grow-0  border-gray-300 bg-gray-200 min-w-0 text-left shadow-xs`}>
-												<div className='text-xs text-gray-500 flex'>
-													<p className='flex w-8/12'>
+												className={`mx-2 my-1 items-start px-2 py-3 rounded-md border border-gray-300 max-w-xs sm:max-w-sm md:max-w-md xl:max-w-xl flex-grow-0 bg-gray-200 min-w-0 text-left shadow-xs`}>
+												<div className='text-xs text-gray-500 flex justify-between'>
+													<p className=''>
 														{comparing_author(message.author.user_id)
 															? "You"
 															: "From: " + message.author.user_name}{" "}
 													</p>
-													<p className='inline-flex ml-1'>
+													<p className='ml-1'>
 														{" " +
 															message.created_at.split("T")[1].split(".")[0].slice(0, 5)}
 													</p>

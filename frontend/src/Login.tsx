@@ -37,7 +37,7 @@ const Login = () => {
 				setIsLogedIn(true);
 				setCsrfToken(Cookies.get("csrftoken")!);
 				get_current_user_or_log_out();
-				history.push("/");
+				history.push("/chat");
 			} else {
 				setError("Username or password Incorrect");
 				throw new Error(error);

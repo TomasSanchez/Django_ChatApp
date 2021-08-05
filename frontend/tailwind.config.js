@@ -1,4 +1,4 @@
-const scales1_20to80_20 = {
+const values = {
 	"1/100": "1%",
 	"2/100": "2%",
 	"3/100": "3%",
@@ -39,6 +39,7 @@ const scales1_20to80_20 = {
 	"97/100": "97%",
 	"98/100": "98%",
 	"99/100": "99%",
+	"120p": "120px",
 };
 
 module.exports = {
@@ -46,9 +47,9 @@ module.exports = {
 	darkMode: false, // or 'media' or 'class'
 	theme: {
 		extend: {
-			height: scales1_20to80_20,
-			width: scales1_20to80_20,
-			maxWidth: scales1_20to80_20,
+			height: values,
+			width: values,
+			maxWidth: values,
 		},
 	},
 	variants: {

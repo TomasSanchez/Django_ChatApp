@@ -140,8 +140,30 @@ const Chat = () => {
 			});
 
 			if (response.status === 202) {
+				console.log(response.data);
 				getChats();
 				setJoinGroupName("");
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const leaveGroup = async (chatName: string) => {
+		try {
+			const response = await axiosInstance(`/api/chat/join/${chatName}`, {
+				headers: {
+					"Content-Type": "application/json",
+					"X-CSRFToken": csrfToken,
+				},
+				withCredentials: true,
+				method: "PUT",
+			});
+
+			if (response.status === 202) {
+				console.log(response.data);
+				client!.close();
+				getChats();
 			}
 		} catch (error) {
 			console.error(error);
@@ -211,6 +233,12 @@ const Chat = () => {
 		joinGroup(chatName);
 	};
 
+	const handleLeave = (e: SyntheticEvent, chatName: string) => {
+		console.log("This ran");
+		e.stopPropagation();
+		leaveGroup(chatName);
+	};
+
 	const handleEnable = () => {
 		setTimeout(() => {
 			console.log("AntiSpam!");
@@ -257,62 +285,64 @@ const Chat = () => {
 				{/*LEFT panel */}
 				<div className='container w-1/3 bg-gray-300 overflow-y-auto flex flex-col h-full border-r border-gray-400  rounded-r-none '>
 					{/* Search */}
-					<div className=' hidden sm:flex flex-row text-xs bg-gray-400 px-2 py-4 align-middle justify-start'>
+					<div className=' hidden sm:block md:flex-col xl:flex xl:flex-row text-xs bg-gray-400 px-2 py-4 align-middle justify-start'>
 						{" "}
 						{/* CREATE GROUP */}
-						<div className='flex'>
+						<div className='flex my-1'>
 							<input
-								className='flex bg-gray-300 px-2 py-1 text-gray-900 rounded-lg'
+								className=' bg-gray-300 px-2 py-1 text-gray-900 rounded-lg xl:max-w-120p'
 								type='text'
 								placeholder='New Group Name'
 								value={newGroupName}
 								onChange={(e) => setNewGroupName(e.target.value)}
+								maxLength={15}
 							/>
+							<button
+								className='hover:text-gray-800 hover:underline align-middle flex p-1 ml-2'
+								onClick={() => handleCreate(newGroupName)}>
+								<svg
+									xmlns='http://www.w3.org/2000/svg'
+									className='h-4 w-4 hover:text-gray-600'
+									fill='none'
+									viewBox='0 0 24 24'
+									stroke='currentColor'>
+									<path
+										strokeLinecap='round'
+										strokeLinejoin='round'
+										strokeWidth={2}
+										d='M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z'
+									/>
+								</svg>
+							</button>
 						</div>
-						<button
-							className='hover:text-gray-800 hover:underline align-middle flex p-1 ml-2'
-							onClick={() => handleCreate(newGroupName)}>
-							<svg
-								xmlns='http://www.w3.org/2000/svg'
-								className='h-4 w-4 hover:text-gray-600'
-								fill='none'
-								viewBox='0 0 24 24'
-								stroke='currentColor'>
-								<path
-									strokeLinecap='round'
-									strokeLinejoin='round'
-									strokeWidth={2}
-									d='M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z'
-								/>
-							</svg>
-						</button>
 						{/* JOIN GROUP */}
-						<div className='flex ml-4'>
+						<div className='flex xl:ml-4 my-1'>
 							<input
-								className='flex bg-gray-300 px-2 py-1 text-gray-900 rounded-lg'
+								className='flex bg-gray-300 px-2 py-1 text-gray-900 rounded-lg xl:max-w-120p'
 								type='text'
 								placeholder='Join Group'
 								value={joinGroupName}
 								onChange={(e) => setJoinGroupName(e.target.value)}
+								maxLength={15}
 							/>
+							<button
+								className='hover:text-gray-800 hover:underline align-middle flex p-1 ml-2'
+								onClick={() => handleJoin(joinGroupName)}>
+								<svg
+									xmlns='http://www.w3.org/2000/svg'
+									className='h-4 w-4 hover:text-gray-600'
+									fill='none'
+									viewBox='0 0 24 24'
+									stroke='currentColor'>
+									<path
+										strokeLinecap='round'
+										strokeLinejoin='round'
+										strokeWidth={2}
+										d='M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z'
+									/>
+								</svg>
+							</button>
 						</div>
-						<button
-							className='hover:text-gray-800 hover:underline align-middle flex p-1 ml-2'
-							onClick={() => handleJoin(joinGroupName)}>
-							<svg
-								xmlns='http://www.w3.org/2000/svg'
-								className='h-4 w-4 hover:text-gray-600'
-								fill='none'
-								viewBox='0 0 24 24'
-								stroke='currentColor'>
-								<path
-									strokeLinecap='round'
-									strokeLinejoin='round'
-									strokeWidth={2}
-									d='M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z'
-								/>
-							</svg>
-						</button>
 					</div>
 					{!chats ? (
 						<div className='p-4'>Loading chats!</div>
@@ -323,7 +353,24 @@ const Chat = () => {
 								className='flex border-t border-gray-300 px-2 py-3 sm:py-5 bg-gray-200 hover:bg-gray-100'
 								onClick={() => handleChatView(chat.id)}>
 								<div className='flex flex-col' style={{ width: "-webkit-fill-available" }}>
-									<p className='text-gray-900 h-6 overflow-hidden '>{chat.group_name}</p>
+									<div className='flex justify-between'>
+										<p className='text-gray-900 h-6 overflow-hidden '>{chat.group_name}</p>
+										<button
+											className='text-red-800'
+											onClick={(e) => handleLeave(e, chat.group_name)}>
+											<svg
+												xmlns='http://www.w3.org/2000/svg'
+												className='h-5 w-5'
+												viewBox='0 0 20 20'
+												fill='currentColor'>
+												<path
+													fillRule='evenodd'
+													d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
+													clipRule='evenodd'
+												/>
+											</svg>
+										</button>
+									</div>
 									<div className=' sm:flex sm:flex-row text-xs justify-between'>
 										<div className='text-gray-900 overflow-hidden'>
 											<p className='h-4'>
@@ -362,7 +409,6 @@ const Chat = () => {
 								</div>
 								<div className='flex'>
 									<button onClick={() => handleDelete(activeChat)}>
-										{/* {activeChat} */}
 										<svg
 											xmlns='http://www.w3.org/2000/svg'
 											className='h-4 w-4 hover:text-gray-600'

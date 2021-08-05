@@ -79,7 +79,7 @@ class CreateGroupChat(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class JoinGroupChat(generics.GenericAPIView):
+class JoinOrLeaveGroupChat(generics.GenericAPIView):
     """ Joins user to a chat, or adds another user to chat """
     
     permission_classes = [IsAuthenticated]

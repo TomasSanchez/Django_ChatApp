@@ -3,10 +3,20 @@
 import os
 import sys
 from pathlib import Path
+import environ
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'admin.settings.production')
+    current_path = Path(__file__).parent.resolve()
+    
+    env = environ.Env()
+    env.read_env(str(current_path / ".env.local"))
+    
+    DEBUG = os.environ.get('DEBUG', False)
+    if DEBUG:
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'admin.settings.local')
+    else:
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'admin.settings.production')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -16,8 +26,6 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
     
-    current_path = Path(__file__).parent.resolve()
-    # print(current_path)
     sys.path.append(str(current_path / "apps"))
     execute_from_command_line(sys.argv)
 

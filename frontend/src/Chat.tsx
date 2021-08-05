@@ -346,6 +346,11 @@ const Chat = () => {
 					</div>
 					{!chats ? (
 						<div className='p-4'>Loading chats!</div>
+					) : !(chats.length > 0) ? (
+						<div className='flex border-t border-gray-300 px-2 py-3 sm:py-5 bg-yellow-100 bg-opacity-60'>
+							{" "}
+							No chats yet! Create or Join a group chat
+						</div>
 					) : (
 						chats!.map((chat: chatType) => (
 							<div

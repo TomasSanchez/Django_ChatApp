@@ -1,3 +1,4 @@
+import os
 from .base import *  # noqa
 from .base import env
 
@@ -8,7 +9,7 @@ DEBUG = False
 SECRET_KEY = env.str("SECRET_KEY")
 
 # TODO Set list on env file
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["0.0.0.0"])
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["*"])
 
 
 CHANNEL_LAYERS = {
@@ -20,18 +21,20 @@ CHANNEL_LAYERS = {
     },
 }
 
-# TODO
-"""
-Configure databases
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env.str('DB_NAME'),
+        'USER': env.str('DB_USER'),
+        'PASSWORD': env.str('DB_PASS'),
+        'HOST': env.str('DB_HOST'),
+        'PORT': env.int('DB_PORT', 5432)
+    }
+}
 
-Conf static and media files to work with nginx
+# Conf static and media files to work with nginx
+STATIC_URL = '/django_static/'
 
-Conf asgi to work with channels 
-
-Conf Celery
-
-Conf Redis
-
-Conf All Auth
-"""
+STATIC_ROOT = os.path.join(BASE_DIR, 'django_static_files')
+# STATIC_ROOT = str(BASE_DIR / "django_static_files")
 

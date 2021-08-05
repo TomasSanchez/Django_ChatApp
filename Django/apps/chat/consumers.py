@@ -48,6 +48,7 @@ class AsyncPrivateChatConsumer(AsyncWebsocketConsumer):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = 'chat_%s' % self.room_name
         
+        # print(f"------------------------------------------ \n << User:  {self.scope['user']} >> \n------------------------------------------")
         # gets channel object or closes connection
         self.channel, succes = await self.get_channel(room=self.room_name)
 

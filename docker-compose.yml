@@ -1,0 +1,68 @@
+version: "3"
+
+services:
+    nginx:
+        image: nginx:latest
+        # build: ./nginx # location of the dockerfile that defines the nginx image. The dockerfile will be used to spin up an image during the build stage
+        container_name: django_chat_app_nginx_ct
+        ports:
+            - 4000:8080 # 1339:80 map the external port 1339 to the internal port 80. Any traffic from 1339 externally will be passed to port 80 of the NGINX container. To access this app, one would use an address such as 0.0.0.0:1339
+        volumes:
+            - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+            - nginx_logs:/var/log/nginx
+            - react_build:/var/www/react # react build folder
+            - static_vol:/backend/django_static # django static files folder
+        depends_on:
+            - backend
+            - frontend
+        restart: "on-failure"
+
+    backend:
+        build: ./Django
+        restart: "on-failure"
+        container_name: django_blog_app_backend_ct
+        image: django_blog_app_backend_img
+        command: bash -c "python manage.py makemigrations && python manage.py collectstatic --noinput && python manage.py migrate && daphne admin.asgi:application"
+        # command: bash -c "python manage.py runserver"
+        ports:
+            - "${DJANGO_APP_PORT}:${DJANGO_APP_PORT}"
+        volumes:
+            - static_vol:/backend/django_static_files
+        environment:
+            - DJANGO_SETTINGS_MODULE=admin.settings.production
+        env_file:
+            - ./Django/.env.production
+        links:
+            - redis
+        expose:
+            - ${DJANGO_APP_PORT}
+        depends_on:
+            - db
+
+    redis:
+        image: "redis:alpine"
+        ports:
+            - "6379:6379"
+        volumes:
+            - redis_data:/data
+
+    frontend:
+        build: ./frontend
+        container_name: django_chat_app_frontend_ct
+        image: django_chat_app_frontend_img
+        volumes:
+            - react_build:/app/build
+
+    db:
+        image: postgres
+        container_name: django_chat_app_postgresdb_ct
+        environment:
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+volumes:
+    react_build:
+    static_vol:
+    redis_data:
+    nginx_logs:

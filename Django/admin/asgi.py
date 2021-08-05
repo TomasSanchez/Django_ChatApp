@@ -1,17 +1,17 @@
 import os
 
-import apps.chat.routing
-
-from django.urls.conf import re_path
 from django.core.asgi import get_asgi_application
 
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-from channels.sessions import SessionMiddlewareStack
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'admin.settings.local')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', "admin.settings.production")
+
 
 application = get_asgi_application()
+
+# Import after setting DJANGO_SETTINGS_MODULE env
+import apps.chat.routing
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),

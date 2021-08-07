@@ -50,7 +50,6 @@ def login_view(request):
 
     if user is not None:
         login(request, user)
-        channels_login(request, user)
         return JsonResponse({"detail": "User logged in successfully"})
     return JsonResponse({"detail": "Invalid credentials"}, status=400)
 

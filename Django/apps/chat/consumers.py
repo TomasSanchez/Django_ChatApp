@@ -7,6 +7,7 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.layers import get_channel_layer
 from channels.auth import get_user
+from channels.auth import login as channels_login
 
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
@@ -18,14 +19,14 @@ class AsyncPrivateChatConsumer(AsyncWebsocketConsumer):
 
 
     @database_sync_to_async
-    def get_channel(self, room):
+    def get_chatGroup(self, room):
         succes = False
         try:
-            channel = PrivateChat.objects.get(id=room)
+            chatGroup = PrivateChat.objects.get(id=room)
             succes = True
         except PrivateChat.DoesNotExist:
-            channel = ''
-        return channel, succes
+            chatGroup = ''
+        return chatGroup, succes
 
 
     @database_sync_to_async
@@ -38,7 +39,7 @@ class AsyncPrivateChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def save_message(self, author, content):
-        chat = PrivateChat.objects.get(group_name=self.channel)
+        chat = PrivateChat.objects.get(group_name=self.chatGroup)
         saved_message = Message.objects.create(author=author, content=content, chat_private=chat)
         serialized_m = MessageSerializer(saved_message)
         return serialized_m.data
@@ -47,10 +48,8 @@ class AsyncPrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = 'chat_%s' % self.room_name
-        
-        # print(f"------------------------------------------ \n << User:  {self.scope['user']} >> \n------------------------------------------")
         # gets channel object or closes connection
-        self.channel, succes = await self.get_channel(room=self.room_name)
+        self.chatGroup, succes = await self.get_chatGroup(room=self.room_name)
 
         # Join room group
         await self.channel_layer.group_add(
@@ -72,7 +71,7 @@ class AsyncPrivateChatConsumer(AsyncWebsocketConsumer):
         message = data['message']
         # get user
         user = await self.get_user_obj(user_id=data['user']['id'])
-        
+
         # as of scope['user'] not working, semi solution is to check if the user is authenticated when sending a message
         if not user.is_authenticated:
             await self.send(text_data=json.dumps('User not authenticated'))

@@ -1,5 +1,7 @@
 import json
 
+from rest_framework.serializers import Serializer
+
 from .models import User
 from .serializers import UserSerializer
 
@@ -102,6 +104,6 @@ class WhoAmI(APIView):
     def get(request, format=None):
         if request.user.is_authenticated:
             user = request.user
-            return Response({ 'id':user.id, 'email':user.email, 'user_name':user.user_name,
-                            'first_name':user.first_name, 'last_name':user.last_name})
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
         return Response({'AnonymousUser'})

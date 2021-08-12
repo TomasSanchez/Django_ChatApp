@@ -16,7 +16,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from channels.auth import login as channels_login
 
 class CreateUser(APIView):
     permission_classes = [AllowAny]
@@ -26,7 +25,6 @@ class CreateUser(APIView):
             new_user = reg_serializer.save()
             if new_user:
                 return Response({'detail': 'User Created'}, status=status.HTTP_201_CREATED)
-        print(reg_serializer.errors)
         return Response(reg_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -49,9 +47,8 @@ def login_view(request):
             status=400,
         )
     user = authenticate(email=email, password=password)
-
     if user is not None:
-        login(request, user)
+        login(request=request,user=user, backend='django.contrib.auth.backends.ModelBackend')
         return JsonResponse({"detail": "User logged in successfully"})
     return JsonResponse({"detail": "Invalid credentials"}, status=400)
 
@@ -105,5 +102,6 @@ class WhoAmI(APIView):
         if request.user.is_authenticated:
             user = request.user
             serializer = UserSerializer(user)
-            return Response(serializer.data)
-        return Response({'AnonymousUser'})
+            serializer.data['authenticated'] = 1
+            return Response({'detail':'LoggedIn','user':serializer.data})
+        return Response({'detail':'AnonymousUser'})

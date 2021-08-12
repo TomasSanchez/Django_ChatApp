@@ -12,7 +12,7 @@ type userType = {
 };
 
 type AuthProps = {
-	isLogedIn: boolean;
+	isLogedIn: boolean | undefined;
 	setIsLogedIn: (value: boolean) => void;
 	csrfToken: string | undefined;
 	setCsrfToken: (value: string) => void;
@@ -21,7 +21,7 @@ type AuthProps = {
 };
 
 export const ContextAuth = createContext<AuthProps>({
-	isLogedIn: false,
+	isLogedIn: undefined,
 	setIsLogedIn: (value: boolean) => undefined,
 	csrfToken: "",
 	setCsrfToken: (value: string) => undefined,
@@ -30,7 +30,7 @@ export const ContextAuth = createContext<AuthProps>({
 });
 
 const AuthContext = ({ children }: any) => {
-	const [isLogedIn, setIsLogedIn] = useState<boolean>(false);
+	const [isLogedIn, setIsLogedIn] = useState<boolean | undefined>(undefined);
 	const [csrfToken, setCsrfToken] = useState<string | undefined>("");
 	const [current_logged_user, setUser] = useState();
 
@@ -44,10 +44,14 @@ const AuthContext = ({ children }: any) => {
 		});
 
 		if (response.status === 200) {
-			if (response.data[0] !== "AnonymousUser") {
+			console.log("DAT FROM AIUTH", response.data);
+
+			if (response.data.detail === "LoggedIn") {
 				setIsLogedIn(true);
 				setCsrfToken(Cookies.get("csrftoken"));
-				setUser(response.data);
+				setUser(response.data.user);
+			} else if (response.data.detail === "AnonymousUser") {
+				setIsLogedIn(false);
 			}
 		}
 	};

@@ -195,11 +195,12 @@ const ChatWNotifications = () => {
 	useEffect(() => {
 		getChats();
 		if (!client && current_logged_user) {
-			console.log("THIS FUCKING RAAAN");
+			// sets connecntion after current user refreshes and only if the connection is not there.
 			setConnection();
 		}
 		// eslint-disable-next-line
 	}, [current_logged_user]);
+
 	if (client) {
 		client.onopen = () => {
 			setWsConectingError(wsErrors[client.readyState]);
@@ -236,10 +237,6 @@ const ChatWNotifications = () => {
 			return chat;
 		});
 		setChats(updated_chats);
-		// current_chat!.messages.content = message.content;
-		// current_chat!.messages.author = message.author;
-		// current_chat!.messages.created_at = message.created_at;
-		// current_chat!.messages.read = false;
 		if (message.private_chat.id === activeChat) {
 			setMessages((prevMessages) => [message, ...prevMessages!]);
 		}
@@ -286,6 +283,7 @@ const ChatWNotifications = () => {
 			setActiveChat(id);
 			setInput("");
 		}
+		// On clicking a chat we mark the last message as read of that chat
 		const updated_chats = chats!.map((chat) => {
 			if (chat.id === id) {
 				const updated_message = {
@@ -302,8 +300,8 @@ const ChatWNotifications = () => {
 	const comparing_author = (author_id: string) => {
 		return parseInt(author_id) === current_logged_user!.id;
 	};
-	// !isLogedIn
-	return false ? (
+
+	return !isLogedIn ? (
 		<div className='container mx-auto w-2/3 bg-gray-200 text-gray-800 mt-12  p-4 text-xl'>
 			<div>Log In to view your chats!</div>
 		</div>

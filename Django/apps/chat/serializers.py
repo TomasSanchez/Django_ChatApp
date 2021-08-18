@@ -36,7 +36,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ('id', 'author', 'created_at', 'content', 'private_chat')
+        fields = ('id', 'author', 'created_at', 'content', 'read', 'private_chat')
 
     def get_author(self, obj):
         user_name = obj.author.user_name

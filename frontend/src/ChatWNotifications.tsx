@@ -20,7 +20,7 @@ type messageType = {
 	id: string;
 	author: userType;
 	created_at: string;
-	read: boolean;
+	read: userType[];
 	content: string;
 	chat_group_id: number | null;
 	private_chat: messageChatType;
@@ -35,7 +35,8 @@ type chatType = {
 };
 
 const orderByLastMessage: (chats: chatType[]) => chatType[] = (chats: chatType[]) => {
-	let new_chats = chats.sort((firstEl, secondEl) =>
+	// order chats to be displayed based on last message datetime field
+	const new_chats = chats.sort((firstEl, secondEl) =>
 		firstEl.messages.created_at < secondEl.messages.created_at
 			? 1
 			: secondEl.messages.created_at < firstEl.messages.created_at
@@ -76,6 +77,7 @@ const ChatWNotifications = () => {
 
 			if (response.status === 200) {
 				setChats(response.data);
+				console.log("CHATS: ", response.data);
 			}
 		} catch (error) {
 			console.error(error);
@@ -180,19 +182,38 @@ const ChatWNotifications = () => {
 		}
 	};
 
+	const markMessageChatsRead = async (chatId: string) => {
+		// After clicking on chat, call back end to mark all messages of current chat as read.
+		try {
+			const response = await axiosInstance(`/api/chat/messages/read/${chatId}`, {
+				headers: {
+					"Content-Type": "application/json",
+					"X-CSRFToken": csrfToken,
+				},
+				withCredentials: true,
+				method: "PUT",
+			});
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
 	const setConnection = () => {
+		// Establish ws connection, store it on state variable and set error
 		const socketClient = new W3CWebSocket(`ws://127.0.0.1:8000/ws/chat/privatewn/${current_logged_user?.id}/`);
 		setClient(socketClient);
 		setWsConectingError(wsErrors[socketClient.readyState]);
 	};
 
 	useEffect(() => {
+		// order chats based on last message of each chat
 		if (chats) {
 			orderByLastMessage(chats!);
 		}
 	}, [chats]);
 
 	useEffect(() => {
+		// get chats and set ws connection
 		getChats();
 		if (!client && current_logged_user) {
 			// sets connecntion after current user refreshes and only if the connection is not there.
@@ -223,20 +244,32 @@ const ChatWNotifications = () => {
 	}
 
 	const updateMessages = (message: messageType) => {
+		// for incomming message from ws
 		const updated_chats = chats!.map((chat) => {
+			// if the message belongs to current active chat we mark it as read on update, else do nothing (it will appear as unread on corresponding chat)
 			if (chat.id === message.private_chat.id) {
+				// format for user, this should be fixed, made this way beacause of backend data
+				const user = {
+					user_id: current_logged_user!.id.toString(),
+					user_name: current_logged_user!.user_name,
+					first_name: current_logged_user!.first_name,
+					last_name: current_logged_user!.last_name,
+				};
+				// update last message to be shown on chat panel
+				// TODO Check for incomming messages of another chat if last message of chat updates
 				const updated_message = {
 					...chat.messages,
 					content: message.content,
 					author: message.author,
 					created_at: message.created_at,
-					read: false,
+					read: [user],
 				};
 				return { ...chat, messages: updated_message };
 			}
 			return chat;
 		});
 		setChats(updated_chats);
+		// if the message belongs to current active chat window, display it
 		if (message.private_chat.id === activeChat) {
 			setMessages((prevMessages) => [message, ...prevMessages!]);
 		}
@@ -260,6 +293,7 @@ const ChatWNotifications = () => {
 	};
 
 	const handleEnable = () => {
+		// simple function to stop spamimng, as this is a demo
 		setDisabled(true);
 		setTimeout(() => {
 			console.log("AntiSpam!");
@@ -270,10 +304,34 @@ const ChatWNotifications = () => {
 	const handleSubmit = (e: SyntheticEvent) => {
 		e.preventDefault();
 		if (isLogedIn && client!.readyState) {
+			// send message to ws
 			client!.send(JSON.stringify({ message: input, user: current_logged_user, group: activeChat }));
 			setInput("");
+			// calls to anti spam function
 			handleEnable();
 		}
+	};
+
+	const updateChats: (id: string) => chatType[] = (id: string) => {
+		// update chats to mark last message as read of current chat
+		const updated_chats = chats!.map((chat) => {
+			if (chat.id === id) {
+				const user = {
+					user_id: current_logged_user!.id.toString(),
+					user_name: current_logged_user!.user_name,
+					first_name: current_logged_user!.first_name,
+					last_name: current_logged_user!.last_name,
+				};
+				const updated_message = {
+					// we only want to modify the read property here so we can cancel notification icon
+					...chat.messages,
+					read: [user],
+				};
+				return { ...chat, messages: updated_message };
+			}
+			return chat;
+		});
+		return updated_chats;
 	};
 
 	const handleChatView = (id: string) => {
@@ -284,20 +342,13 @@ const ChatWNotifications = () => {
 			setInput("");
 		}
 		// On clicking a chat we mark the last message as read of that chat
-		const updated_chats = chats!.map((chat) => {
-			if (chat.id === id) {
-				const updated_message = {
-					...chat.messages,
-					read: true,
-				};
-				return { ...chat, messages: updated_message };
-			}
-			return chat;
-		});
-		setChats(updated_chats);
+		setChats(updateChats(id));
+		// On cicking a chat also call to backend to mark all non read messages as read for the current user on current chat
+		markMessageChatsRead(id);
 	};
 
 	const comparing_author = (author_id: string) => {
+		// check if author is the same as the current logged user
 		return parseInt(author_id) === current_logged_user!.id;
 	};
 
@@ -385,16 +436,21 @@ const ChatWNotifications = () => {
 							<div
 								key={chat.id}
 								className='flex border-t border-gray-300 px-2 py-1 sm:py-5 bg-gray-200 hover:bg-gray-100'
-								// className='flex border-t border-red-300 px-2 py-3 sm:py-5 bg-gray-200 hover:bg-gray-100'
 								onClick={() => handleChatView(chat.id)}>
 								<div className='flex flex-col' style={{ width: "-webkit-fill-available" }}>
 									{/* Notification icon */}
-									<div
-										className={`${
-											activeChat === chat.id ? "hidden" : !chat.messages.read ? "flex" : "hidden"
-										} justify-end mb-2`}>
-										<div className='rounded-full h-2 w-2 bg-red-600'></div>
-									</div>
+									{chat.messages.read && (
+										<div
+											className={`${
+												chat.messages.read.some(
+													(user) => user.user_id === current_logged_user?.id.toString()
+												)
+													? "hidden"
+													: "flex"
+											} justify-end mb-2`}>
+											<div className='rounded-full h-2 w-2 bg-red-600'></div>
+										</div>
+									)}
 									<div className='flex justify-between'>
 										<p className='text-gray-900 h-6 overflow-hidden '>{chat.group_name}</p>
 										<button

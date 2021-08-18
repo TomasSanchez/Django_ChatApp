@@ -136,23 +136,12 @@ class MarkReadMessages(generics.UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         user = request.user
-        partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        # TODO
-        # get all messages from group where user has not yet read the message, then mark all as read
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        if getattr(instance, '_prefetched_objects_cache', None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
-            instance._prefetched_objects_cache = {}
-
-        return Response(serializer.data)
-
-    def perform_update(self, serializer):
-        serializer.save()
+        # get all messages from group where user has not yet read the message, then mark all as read(add user to read list)
+        messages = instance.private_chat_message.exclude(read=user.id)
+        for message in messages:
+            message.read.add(user)
+        # Message.objects.bulk_update(messages, ['read'])
 
 
 # REMOVE

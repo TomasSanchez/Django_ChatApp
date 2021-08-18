@@ -20,14 +20,16 @@ type AuthProps = {
 	get_current_user_or_log_out: VoidFunction;
 };
 
-export const ContextAuth = createContext<AuthProps>({
+const initialState = {
 	isLogedIn: undefined,
 	setIsLogedIn: (value: boolean) => undefined,
 	csrfToken: "",
 	setCsrfToken: (value: string) => undefined,
 	current_logged_user: undefined,
 	get_current_user_or_log_out: () => undefined,
-});
+};
+
+export const ContextAuth = createContext<AuthProps>(initialState);
 
 const AuthContext = ({ children }: any) => {
 	const [isLogedIn, setIsLogedIn] = useState<boolean | undefined>(undefined);
@@ -44,8 +46,6 @@ const AuthContext = ({ children }: any) => {
 		});
 
 		if (response.status === 200) {
-			console.log("DAT FROM AIUTH", response.data);
-
 			if (response.data.detail === "LoggedIn") {
 				setIsLogedIn(true);
 				setCsrfToken(Cookies.get("csrftoken"));

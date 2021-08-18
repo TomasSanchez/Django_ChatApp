@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import About from "./About";
 import App from "./App";
 import Chat from "./Chat";
+import ChatWNotifications from "./ChatWNotifications";
 import Navbar from "./components/Navbar";
 import PrivateRoute from "./components/ProtectedRoute";
 import AuthContext from "./context/AuthContext";
@@ -19,6 +20,7 @@ ReactDOM.render(
 				<Route exact path='/' component={App} />
 				<Route exact path='/chat/public' component={SimpleChat} />
 				<PrivateRoute exact path='/chat' component={Chat} />
+				<PrivateRoute exact path='/chat-not' component={ChatWNotifications} />
 				<Route exact path='/login' component={Login} />
 				<Route exact path='/signup' component={Signup} />
 				<Route exact path='/about' component={About} />

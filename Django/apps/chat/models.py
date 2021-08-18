@@ -9,6 +9,8 @@ class Message(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name='user_message')
     created_at = models.DateTimeField(auto_now_add=True)
     content = models.TextField(_('content'))
+    # read = models.BooleanField(default=False)
+    read = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='read_message')
     chat_group = models.ForeignKey('GroupChat', on_delete=models.CASCADE, blank=True, null=True, related_name='group_chat_message')
     chat_private = models.ForeignKey('PrivateChat', on_delete=models.CASCADE, blank=True, null=True, related_name='private_chat_message')
 

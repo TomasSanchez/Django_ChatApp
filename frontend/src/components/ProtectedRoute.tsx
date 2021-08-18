@@ -5,7 +5,6 @@ import { ContextAuth } from "../context/AuthContext";
 const PrivateRoute = (props: any) => {
 	const location = useLocation();
 	const { isLogedIn } = useContext(ContextAuth);
-	console.log("isLogedIn", isLogedIn);
 
 	return isLogedIn === undefined ? (
 		<div>Loading</div>

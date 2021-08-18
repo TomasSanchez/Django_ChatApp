@@ -20,6 +20,7 @@ type messageType = {
 	id: string;
 	author: userType;
 	created_at: string;
+	read: boolean;
 	content: string;
 	chat_group_id: number | null;
 	private_chat: messageChatType;
@@ -44,7 +45,7 @@ const orderByLastMessage: (chats: chatType[]) => chatType[] = (chats: chatType[]
 	return new_chats;
 };
 
-const Chat = () => {
+const ChatWNotifications = () => {
 	const wsErrors = [
 		{ error: "Connecting", readyState: 0 },
 		{ error: "Connected", readyState: 1 },
@@ -57,7 +58,7 @@ const Chat = () => {
 	const [client, setClient] = useState<W3CWebSocket>(); // websocket client
 	const [disabled, setDisabled] = useState<boolean>(false); // Disables input for 2 seconds after enter to prevent spaming
 	const [messages, setMessages] = useState<messageType[]>(); // Messages of a specific chat/group
-	const [activeChat, setActiveChat] = useState<string>(); // Current chat to show messages from
+	const [activeChat, setActiveChat] = useState<string>(""); // Current chat to show messages from
 	const [joinGroupName, setJoinGroupName] = useState<string>(""); // input text from search view
 	const [newGroupName, setNewGroupName] = useState<string>(""); // input text from search view
 	const [wsConectingError, setWsConectingError] = useState(wsErrors[0]); // Display current connection status
@@ -74,17 +75,12 @@ const Chat = () => {
 			});
 
 			if (response.status === 200) {
-				console.log(response.data);
 				setChats(response.data);
 			}
 		} catch (error) {
 			console.error(error);
 		}
 	};
-
-	if (chats) {
-		orderByLastMessage(chats!);
-	}
 
 	// gets called upong click of chat and gets all messages of selected chat
 	const getMessages = async (id: string) => {
@@ -98,8 +94,6 @@ const Chat = () => {
 			});
 
 			if (response.status === 200) {
-				console.log("Messages: ", response.data);
-
 				setMessages(response.data);
 			}
 		} catch (error) {
@@ -140,7 +134,6 @@ const Chat = () => {
 			});
 
 			if (response.status === 202) {
-				console.log(response.data);
 				getChats();
 				setJoinGroupName("");
 			}
@@ -161,7 +154,6 @@ const Chat = () => {
 			});
 
 			if (response.status === 202) {
-				console.log(response.data);
 				client!.close();
 				getChats();
 			}
@@ -188,18 +180,35 @@ const Chat = () => {
 		}
 	};
 
+	const setConnection = () => {
+		const socketClient = new W3CWebSocket(`ws://127.0.0.1:8000/ws/chat/privatewn/${current_logged_user?.id}/`);
+		setClient(socketClient);
+		setWsConectingError(wsErrors[socketClient.readyState]);
+	};
+
+	useEffect(() => {
+		if (chats) {
+			orderByLastMessage(chats!);
+		}
+	}, [chats]);
+
 	useEffect(() => {
 		getChats();
+		if (!client && current_logged_user) {
+			console.log("THIS FUCKING RAAAN");
+			setConnection();
+		}
 		// eslint-disable-next-line
-	}, []);
-
+	}, [current_logged_user]);
 	if (client) {
 		client.onopen = () => {
 			setWsConectingError(wsErrors[client.readyState]);
+			client!.send(JSON.stringify({ type: "first", user: current_logged_user }));
 			console.log("OPEN, WebSocket Client Connected");
 		};
 		client.onmessage = (message) => {
 			const data = JSON.parse(message.data as string).data;
+			console.log("data: ", data);
 			updateMessages(data);
 		};
 		client.onerror = (error) => {
@@ -213,12 +222,27 @@ const Chat = () => {
 	}
 
 	const updateMessages = (message: messageType) => {
-		console.log("incoming message:", message);
-		setMessages((prevMessages) => [message, ...prevMessages!]);
-		const current_chat = chats?.find((chat) => chat.id === message.private_chat.id);
-		current_chat!.messages.content = message.content;
-		current_chat!.messages.author = message.author;
-		current_chat!.messages.created_at = message.created_at;
+		const updated_chats = chats!.map((chat) => {
+			if (chat.id === message.private_chat.id) {
+				const updated_message = {
+					...chat.messages,
+					content: message.content,
+					author: message.author,
+					created_at: message.created_at,
+					read: false,
+				};
+				return { ...chat, messages: updated_message };
+			}
+			return chat;
+		});
+		setChats(updated_chats);
+		// current_chat!.messages.content = message.content;
+		// current_chat!.messages.author = message.author;
+		// current_chat!.messages.created_at = message.created_at;
+		// current_chat!.messages.read = false;
+		if (message.private_chat.id === activeChat) {
+			setMessages((prevMessages) => [message, ...prevMessages!]);
+		}
 	};
 
 	const handleDelete = (chatId: string) => {
@@ -234,7 +258,6 @@ const Chat = () => {
 	};
 
 	const handleLeave = (e: SyntheticEvent, chatName: string) => {
-		console.log("This ran");
 		e.stopPropagation();
 		leaveGroup(chatName);
 	};
@@ -250,32 +273,37 @@ const Chat = () => {
 	const handleSubmit = (e: SyntheticEvent) => {
 		e.preventDefault();
 		if (isLogedIn && client!.readyState) {
-			client!.send(JSON.stringify({ message: input, user: current_logged_user }));
+			client!.send(JSON.stringify({ message: input, user: current_logged_user, group: activeChat }));
 			setInput("");
 			handleEnable();
 		}
 	};
 
 	const handleChatView = (id: string) => {
-		// close client if predefined before for another chat, if clicked on same chat prevent over connections
+		// Change active chat by selecting chats on left side panel
 		if (activeChat !== id) {
-			if (client) {
-				client.close();
-			}
-			const socketClient = new W3CWebSocket(`ws://127.0.0.1:8000/ws/chat/private/${id}/`);
-			setWsConectingError(wsErrors[socketClient.readyState]);
-			setClient(socketClient);
 			getMessages(id);
 			setActiveChat(id);
 			setInput("");
 		}
+		const updated_chats = chats!.map((chat) => {
+			if (chat.id === id) {
+				const updated_message = {
+					...chat.messages,
+					read: true,
+				};
+				return { ...chat, messages: updated_message };
+			}
+			return chat;
+		});
+		setChats(updated_chats);
 	};
 
 	const comparing_author = (author_id: string) => {
 		return parseInt(author_id) === current_logged_user!.id;
 	};
-
-	return !isLogedIn ? (
+	// !isLogedIn
+	return false ? (
 		<div className='container mx-auto w-2/3 bg-gray-200 text-gray-800 mt-12  p-4 text-xl'>
 			<div>Log In to view your chats!</div>
 		</div>
@@ -283,9 +311,12 @@ const Chat = () => {
 		<div className=' md:h-93/100 p-1 bg-gray-500  h-80/100'>
 			<div className='flex flex-row items-start h-full '>
 				{/*LEFT panel */}
-				<div className='container w-1/3 bg-gray-300 overflow-y-auto flex flex-col h-full border-r border-gray-400  rounded-r-none '>
+				<div
+					className={` ${
+						activeChat !== "" ? "hidden" : "flex"
+					}  container sm:w-1/3 bg-gray-300 overflow-y-auto sm:flex flex-col h-full border-r border-gray-400  rounded-r-none `}>
 					{/* Search */}
-					<div className=' hidden sm:block md:flex-col xl:flex xl:flex-row text-xs bg-gray-400 px-2 py-4 align-middle justify-start'>
+					<div className=' md:flex-col xl:flex xl:flex-row text-xs bg-gray-400 px-2 py-4 align-middle justify-start'>
 						{" "}
 						{/* CREATE GROUP */}
 						<div className='flex my-1'>
@@ -346,7 +377,7 @@ const Chat = () => {
 					</div>
 					{!chats ? (
 						<div className='p-4'>Loading chats!</div>
-					) : !(chats.length > 0) ? (
+					) : !(chats!.length > 0) ? (
 						<div className='flex border-t border-gray-300 px-2 py-3 sm:py-5 bg-yellow-100 bg-opacity-60'>
 							{" "}
 							No chats yet! Create or Join a group chat
@@ -355,9 +386,17 @@ const Chat = () => {
 						chats!.map((chat: chatType) => (
 							<div
 								key={chat.id}
-								className='flex border-t border-gray-300 px-2 py-3 sm:py-5 bg-gray-200 hover:bg-gray-100'
+								className='flex border-t border-gray-300 px-2 py-1 sm:py-5 bg-gray-200 hover:bg-gray-100'
+								// className='flex border-t border-red-300 px-2 py-3 sm:py-5 bg-gray-200 hover:bg-gray-100'
 								onClick={() => handleChatView(chat.id)}>
 								<div className='flex flex-col' style={{ width: "-webkit-fill-available" }}>
+									{/* Notification icon */}
+									<div
+										className={`${
+											activeChat === chat.id ? "hidden" : !chat.messages.read ? "flex" : "hidden"
+										} justify-end mb-2`}>
+										<div className='rounded-full h-2 w-2 bg-red-600'></div>
+									</div>
 									<div className='flex justify-between'>
 										<p className='text-gray-900 h-6 overflow-hidden '>{chat.group_name}</p>
 										<button
@@ -399,7 +438,7 @@ const Chat = () => {
 					)}
 				</div>
 				{/* RIGHT Panel Start of the right container messages view */}
-				<div className='flex flex-col h-full  w-full mx-auto '>
+				<div className={`${activeChat === "" ? "hidden" : "flex"} sm:flex flex-col h-full  w-full mx-auto `}>
 					{!activeChat ? (
 						<div className=' flex flex-col-reverse bg-blue-200 w-full h-full  rounded-l-none overflow-y-auto justify-items-center'>
 							<div className='m-auto  bg-gray-300 px-3 py-5 text-xl sm:text-2xl md:text-4xl text-gray-600 border-2 border-gray-400 mt-20 mx-5 sm:mx-auto'>
@@ -409,11 +448,15 @@ const Chat = () => {
 					) : (
 						<>
 							<div className='h-16 bg-gray-200 w-full  rounded-l-none rounded-b-none flex shadow-md border-b border-gray-300 justify-between align-middle items-center'>
-								<div className='mx-1 p-2 '>
+								<div className='mx-1 p-2 flex'>
+									<button className='mr-1' onClick={() => setActiveChat("")}>
+										{"<"}
+									</button>
+
 									{chats!.find((chat) => chat.id === activeChat)?.group_name}
 								</div>
 								<div className='flex'>
-									<button onClick={() => handleDelete(activeChat)}>
+									<button onClick={() => handleDelete(activeChat!)}>
 										<svg
 											xmlns='http://www.w3.org/2000/svg'
 											className='h-4 w-4 hover:text-gray-600'
@@ -493,4 +536,4 @@ const Chat = () => {
 	);
 };
 
-export default Chat;
+export default ChatWNotifications;

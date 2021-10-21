@@ -1,0 +1,5 @@
+{
+	"python.pythonPath": "Django/venv/bin/python3.9",
+	"python.analysis.extraPaths": ["./Django"]
+}
+// "Django/venv/lib/python3.9/site-packages/django"

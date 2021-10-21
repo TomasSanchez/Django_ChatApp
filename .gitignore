@@ -5,3 +5,4 @@ venv
 .env
 data
 django_static_files
+nginx/logs
